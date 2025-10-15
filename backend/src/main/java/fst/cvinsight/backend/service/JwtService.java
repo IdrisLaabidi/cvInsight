@@ -18,12 +18,14 @@ import java.util.function.Function;
 public class JwtService {
 
     private final SecretKey secretKey;
+    private final int expiration;
 
-    public JwtService(@Value("${jwt.secret}") String jwtSecret) {
+    public JwtService(@Value("${jwt.secret}") String jwtSecret, @Value("${jwt.expiration}") int expiration) {
         this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+        this.expiration = expiration;
     }
 
-    public String generateToken(String email) { // Use email as username
+    public String generateToken(String email) {
         Map<String, Object> claims = new HashMap<>();
         return createToken(claims, email);
     }
@@ -33,7 +35,7 @@ public class JwtService {
                 .claims(claims)
                 .subject(email)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
+                .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(secretKey)
                 .compact();
     }
