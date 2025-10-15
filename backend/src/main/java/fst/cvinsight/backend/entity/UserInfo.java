@@ -1,12 +1,11 @@
 package fst.cvinsight.backend.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import fst.cvinsight.backend.model.AuthProvider;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import java.util.UUID;
 
 @Entity
@@ -22,4 +21,7 @@ public class UserInfo {
     private String email;
     private String password;
     private String roles;
+    private Boolean enabled;
+    @Enumerated(EnumType.STRING)
+    private AuthProvider provider;
 }

@@ -9,6 +9,12 @@ import Button from "../ui/button/Button";
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+
+  const handleGoogleLogin = () => {
+      const backendUrl = "http://localhost:8080/oauth2/authorize/google";
+      window.location.href = backendUrl;
+  };
+
   return (
     <div className="flex flex-col flex-1">
       <div className="w-full max-w-md pt-10 mx-auto">
@@ -32,7 +38,8 @@ export default function SignInForm() {
           </div>
           <div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
-              <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
+              <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+              onClick={handleGoogleLogin}>
                 <svg
                   width="20"
                   height="20"

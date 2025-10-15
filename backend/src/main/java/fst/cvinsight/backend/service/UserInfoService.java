@@ -1,6 +1,7 @@
 package fst.cvinsight.backend.service;
 
 import fst.cvinsight.backend.entity.UserInfo;
+import fst.cvinsight.backend.model.AuthProvider;
 import fst.cvinsight.backend.repo.UserInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -39,5 +41,18 @@ public class UserInfoService implements UserDetailsService {
         userInfo.setPassword(encoder.encode(userInfo.getPassword()));
         repository.save(userInfo);
         return "User added successfully!";
+    }
+
+    @Transactional
+    public UserInfo findOrCreateGoogleUser(String email, String name) {
+        return repository.findByEmail(email)
+                .orElseGet(() -> {
+                    UserInfo newUser = new UserInfo();
+                    newUser.setEmail(email);
+                    newUser.setName(name);
+                    newUser.setProvider(AuthProvider.GOOGLE);
+                    newUser.setEnabled(true);
+                    return repository.save(newUser);
+                });
     }
 }

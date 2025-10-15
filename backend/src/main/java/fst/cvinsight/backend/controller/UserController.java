@@ -1,6 +1,6 @@
 package fst.cvinsight.backend.controller;
 
-import fst.cvinsight.backend.entity.AuthRequest;
+import fst.cvinsight.backend.model.AuthRequest;
 import fst.cvinsight.backend.entity.UserInfo;
 import fst.cvinsight.backend.service.JwtService;
 import fst.cvinsight.backend.service.UserInfoService;

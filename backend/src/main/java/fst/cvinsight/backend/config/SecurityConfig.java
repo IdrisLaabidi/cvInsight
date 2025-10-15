@@ -1,6 +1,7 @@
 package fst.cvinsight.backend.config;
 
 import fst.cvinsight.backend.filter.JwtAuthFilter;
+import fst.cvinsight.backend.service.OAuth2SuccessHandler;
 import fst.cvinsight.backend.service.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -24,13 +25,17 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final UserInfoService userInfoService;
     private final PasswordEncoder encoder;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Autowired
     public SecurityConfig(JwtAuthFilter jwtAuthFilter,
-                          UserInfoService userInfoService, PasswordEncoder encoder) {
+                          UserInfoService userInfoService,
+                          PasswordEncoder encoder,
+                          OAuth2SuccessHandler oAuth2SuccessHandler) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.userInfoService = userInfoService;
         this.encoder = encoder;
+        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
     }
     /*
      * Main security configuration
@@ -53,6 +58,10 @@ public class SecurityConfig {
 
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth -> oauth
+                        // optional: success handler will create/find user and issue JWT
+                        .successHandler(oAuth2SuccessHandler)
                 )
 
                 // Stateless session (required for JWT)

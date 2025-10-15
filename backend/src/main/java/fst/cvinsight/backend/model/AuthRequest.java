@@ -1,4 +1,4 @@
-package fst.cvinsight.backend.entity;
+package fst.cvinsight.backend.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
