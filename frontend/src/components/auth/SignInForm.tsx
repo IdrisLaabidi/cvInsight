@@ -41,7 +41,7 @@ export default function SignInForm() {
         onSubmit: async (values) => {
             try {
                 setErrorMessage(null);
-                const response = await axiosInstance.post("/auth/login", values);
+                const response = await axiosInstance.post("/auth/generateToken", values);
                 const token = response.data.token;
                 localStorage.setItem("jwt", token);
                 navigate("/dashboard");
