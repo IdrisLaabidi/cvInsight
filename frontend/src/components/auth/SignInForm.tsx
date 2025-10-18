@@ -10,12 +10,14 @@ export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
 
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
   const handleGoogleLogin = () => {
-      window.location.href = "http://localhost:8080/oauth2/authorization/google";
+      window.location.href = `${backendUrl}/oauth2/authorization/google`;
   };
 
   const handleMicrosoftLogin = () => {
-      window.location.href = "http://localhost:8080/oauth2/authorization/azure-dev";
+      window.location.href = `${backendUrl}/oauth2/authorization/azure-dev`;
   }
 
   return (
