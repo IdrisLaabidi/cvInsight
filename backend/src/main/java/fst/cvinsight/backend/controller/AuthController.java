@@ -2,8 +2,11 @@ package fst.cvinsight.backend.controller;
 
 import fst.cvinsight.backend.model.AuthRequest;
 import fst.cvinsight.backend.entity.UserInfo;
+import fst.cvinsight.backend.model.RegisterRequest;
 import fst.cvinsight.backend.service.JwtService;
 import fst.cvinsight.backend.service.UserInfoService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -13,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
-public class UserController {
+public class AuthController {
 
     private final UserInfoService service;
 
@@ -21,7 +24,7 @@ public class UserController {
 
     private final AuthenticationManager authenticationManager;
 
-    UserController(UserInfoService service, JwtService jwtService, AuthenticationManager authenticationManager) {
+    AuthController(UserInfoService service, JwtService jwtService, AuthenticationManager authenticationManager) {
         this.service = service;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
@@ -32,18 +35,19 @@ public class UserController {
         return "Welcome this endpoint is not secure";
     }
 
-    @PostMapping("/addNewUser")
-    public String addNewUser(@RequestBody UserInfo userInfo) {
-        return service.addUser(userInfo);
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+        UserInfo user = service.registerUser(request);
+        return ResponseEntity.ok("User registered successfully: " + user.getEmail());
     }
 
     @PostMapping("/generateToken")
     public String authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
+                new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
         );
         if (authentication.isAuthenticated()) {
-            return jwtService.generateToken(authRequest.getUsername());
+            return jwtService.generateToken(authRequest.getEmail());
         } else {
             throw new UsernameNotFoundException("Invalid user request!");
         }

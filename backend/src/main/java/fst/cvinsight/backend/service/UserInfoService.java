@@ -2,6 +2,7 @@ package fst.cvinsight.backend.service;
 
 import fst.cvinsight.backend.entity.UserInfo;
 import fst.cvinsight.backend.model.AuthProvider;
+import fst.cvinsight.backend.model.RegisterRequest;
 import fst.cvinsight.backend.repo.UserInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -49,10 +50,29 @@ public class UserInfoService implements UserDetailsService {
                 .orElseGet(() -> {
                     UserInfo newUser = new UserInfo();
                     newUser.setEmail(email);
-                    newUser.setName(name);
+                    newUser.setUsername(name);
                     newUser.setProvider(authProvider);
                     newUser.setEnabled(true);
+                    newUser.setRoles("ROLE_USER");
                     return repository.save(newUser);
                 });
+    }
+
+    @Transactional
+    public UserInfo registerUser(RegisterRequest request) {
+
+        if (repository.findByEmail(request.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email already in use");
+        }
+
+        UserInfo newUser = new UserInfo();
+        newUser.setEmail(request.getEmail());
+        newUser.setUsername(request.getUsername());
+        newUser.setPassword(encoder.encode(request.getPassword()));
+        newUser.setProvider(AuthProvider.LOCAL);
+        newUser.setEnabled(true);
+        newUser.setRoles("ROLE_USER");
+
+        return repository.save(newUser);
     }
 }
