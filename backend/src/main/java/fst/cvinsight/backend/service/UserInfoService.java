@@ -44,13 +44,13 @@ public class UserInfoService implements UserDetailsService {
     }
 
     @Transactional
-    public UserInfo findOrCreateGoogleUser(String email, String name) {
+    public UserInfo findOrCreateOAuthUser(String email, String name,AuthProvider authProvider) {
         return repository.findByEmail(email)
                 .orElseGet(() -> {
                     UserInfo newUser = new UserInfo();
                     newUser.setEmail(email);
                     newUser.setName(name);
-                    newUser.setProvider(AuthProvider.GOOGLE);
+                    newUser.setProvider(authProvider);
                     newUser.setEnabled(true);
                     return repository.save(newUser);
                 });

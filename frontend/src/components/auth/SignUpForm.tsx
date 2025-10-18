@@ -8,6 +8,17 @@ import Checkbox from "../form/input/Checkbox";
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+  const handleGoogleLogin = () => {
+      window.location.href = `${backendUrl}/oauth2/authorization/google`;
+  };
+
+  const handleMicrosoftLogin = () => {
+      window.location.href = `${backendUrl}/oauth2/authorization/azure-dev`;
+  }
+
   return (
     <div className="flex flex-col flex-1 w-full overflow-y-auto lg:w-1/2 no-scrollbar">
       <div className="w-full max-w-md mx-auto mb-5 sm:pt-10">
@@ -30,7 +41,7 @@ export default function SignUpForm() {
             </p>
           </div>
           <div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
+            <div onClick={handleGoogleLogin} className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
               <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
                 <svg
                   width="20"
@@ -58,7 +69,7 @@ export default function SignUpForm() {
                 </svg>
                 Sign in with Google
               </button>
-              <button disabled={true} className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
+              <button onClick={handleMicrosoftLogin} disabled={true} className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
                   <svg width="20" height="20" viewBox="0 0 2499.6 2500" xmlns="http://www.w3.org/2000/svg">
                       <path d="M1187.9 1187.9H0V0h1187.9z" fill="#f1511b"/>
                       <path d="M2499.6 1187.9H1311.6V0h1187.9v1187.9z" fill="#80cc28"/>
