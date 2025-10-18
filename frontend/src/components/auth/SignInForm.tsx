@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { Link } from "react-router";
-import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
+import {useState} from "react";
+import {Link} from "react-router";
+import {ChevronLeftIcon, EyeCloseIcon, EyeIcon} from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
@@ -11,9 +11,12 @@ export default function SignInForm() {
   const [isChecked, setIsChecked] = useState(false);
 
   const handleGoogleLogin = () => {
-      const backendUrl = "http://localhost:8080/oauth2/authorize/google";
-      window.location.href = backendUrl;
+      window.location.href = "http://localhost:8080/oauth2/authorization/google";
   };
+
+  const handleMicrosoftLogin = () => {
+      window.location.href = "http://localhost:8080/oauth2/authorization/azure-dev";
+  }
 
   return (
     <div className="flex flex-col flex-1">
@@ -66,18 +69,14 @@ export default function SignInForm() {
                 </svg>
                 Sign in with Google
               </button>
-              <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
-                <svg
-                  width="21"
-                  className="fill-current"
-                  height="20"
-                  viewBox="0 0 21 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M15.6705 1.875H18.4272L12.4047 8.75833L19.4897 18.125H13.9422L9.59717 12.4442L4.62554 18.125H1.86721L8.30887 10.7625L1.51221 1.875H7.20054L11.128 7.0675L15.6705 1.875ZM14.703 16.475H16.2305L6.37054 3.43833H4.73137L14.703 16.475Z" />
+              <button onClick={handleMicrosoftLogin} className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
+                <svg width="20" height="20" viewBox="0 0 2499.6 2500" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1187.9 1187.9H0V0h1187.9z" fill="#f1511b"/>
+                    <path d="M2499.6 1187.9H1311.6V0h1187.9v1187.9z" fill="#80cc28"/>
+                    <path d="M1187.9 2500H0V1312.1h1187.9z" fill="#00adef"/>
+                    <path d="M2499.6 2500H1311.6V1312.1h1187.9v1187.9z" fill="#fbbc09"/>
                 </svg>
-                Sign in with X
+                Sign in with Microsoft
               </button>
             </div>
             <div className="relative py-3 sm:py-5">
