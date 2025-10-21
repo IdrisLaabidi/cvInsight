@@ -10,7 +10,7 @@ const axiosInstance = axios.create({
     },
 });
 
-const excludedUrls = ["/auth/login", "/auth/register"];
+const excludedUrls = ["/auth/login", "/auth/register", "/auth/generateToken"];
 
 axiosInstance.interceptors.request.use(
     (config) => {
