@@ -38,18 +38,19 @@ export default function SignInForm() {
                 .min(6, "Password must be at least 6 characters")
                 .required("Password is required"),
         }),
-        onSubmit: async (values) => {
-            try {
-                setErrorMessage(null);
-                const response = await axiosInstance.post("/auth/generateToken", values);
-                const token = response.data.token;
-                localStorage.setItem("jwt", token);
-                navigate("/dashboard");
-            } catch (error: any) {
+        onSubmit: (values) => {
+            setErrorMessage(null);
+            axiosInstance.post("/auth/generateToken", values).then(
+                res => {
+                    const token = res.data.token;
+                    localStorage.setItem("jwt", token);
+                    navigate("/dashboard");
+                }
+            ).catch((error) => {
                 setErrorMessage(
                     error.response?.data?.message || "Invalid email or password"
                 );
-            }
+            });
         },
     });
 

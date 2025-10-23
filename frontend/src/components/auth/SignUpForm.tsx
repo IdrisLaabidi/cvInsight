@@ -1,13 +1,18 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import {Link, useNavigate} from "react-router";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
-import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
+import {useFormik} from "formik";
+import InputField from "../form/input/InputField";
+import * as Yup from "yup";
+import axiosInstance from "../../utils/axiosInstance.ts";
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -18,6 +23,43 @@ export default function SignUpForm() {
   const handleMicrosoftLogin = () => {
       window.location.href = `${backendUrl}/oauth2/authorization/azure-dev`;
   }
+
+  const formik = useFormik({
+      initialValues:{
+          firstname : "",
+          lastname: "",
+          email: "",
+          password: ""
+      },
+      validationSchema:Yup.object({
+          email: Yup.string()
+              .email("Invalid email address")
+              .required("Email is required"),
+          password: Yup.string()
+              .min(6, "Password must be at least 6 characters")
+              .required("Password is required"),
+          firstname: Yup.string()
+              .required("First name is required"),
+          lastname: Yup.string()
+              .required("Last name is required"),
+      }),
+      onSubmit: (values) => {
+          setErrorMessage(null);
+          axiosInstance.post("/auth/register", {
+              email: values.email,
+              password: values.password,
+              username: `${values.firstname} ${values.lastname}`,
+          }).then(
+              res => {
+                  if(res.status == 200) {
+                      navigate("/dashboard");
+                  }
+              }
+          ).catch(err => {
+              setErrorMessage(err.message);
+          });
+      }
+  })
 
   return (
     <div className="flex flex-col flex-1 w-full overflow-y-auto lg:w-1/2 no-scrollbar">
@@ -89,7 +131,7 @@ export default function SignUpForm() {
                 </span>
               </div>
             </div>
-            <form>
+            <form onSubmit={formik.handleSubmit}>
               <div className="space-y-5">
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   {/* <!-- First Name --> */}
@@ -97,24 +139,38 @@ export default function SignUpForm() {
                     <Label>
                       First Name<span className="text-error-500">*</span>
                     </Label>
-                    <Input
+                    <InputField
                       type="text"
                       id="fname"
-                      name="fname"
+                      name="firstname"
                       placeholder="Enter your first name"
+                      onChange={formik.handleChange}
+                      value={formik.values.firstname}
                     />
+                      {formik.touched.firstname && formik.errors.firstname && (
+                          <p className="mt-1 text-sm text-red-500">
+                              {formik.errors.firstname}
+                          </p>
+                      )}
                   </div>
                   {/* <!-- Last Name --> */}
                   <div className="sm:col-span-1">
                     <Label>
                       Last Name<span className="text-error-500">*</span>
                     </Label>
-                    <Input
+                    <InputField
                       type="text"
                       id="lname"
-                      name="lname"
+                      name="lastname"
                       placeholder="Enter your last name"
+                      onChange={formik.handleChange}
+                      value={formik.values.lastname}
                     />
+                      {formik.touched.lastname && formik.errors.lastname && (
+                          <p className="mt-1 text-sm text-red-500">
+                              {formik.errors.lastname}
+                          </p>
+                      )}
                   </div>
                 </div>
                 {/* <!-- Email --> */}
@@ -122,12 +178,19 @@ export default function SignUpForm() {
                   <Label>
                     Email<span className="text-error-500">*</span>
                   </Label>
-                  <Input
+                  <InputField
                     type="email"
                     id="email"
                     name="email"
                     placeholder="Enter your email"
+                    onChange={formik.handleChange}
+                    value={formik.values.email}
                   />
+                    {formik.touched.email && formik.errors.email && (
+                        <p className="mt-1 text-sm text-red-500">
+                            {formik.errors.email}
+                        </p>
+                    )}
                 </div>
                 {/* <!-- Password --> */}
                 <div>
@@ -135,9 +198,12 @@ export default function SignUpForm() {
                     Password<span className="text-error-500">*</span>
                   </Label>
                   <div className="relative">
-                    <Input
+                    <InputField
                       placeholder="Enter your password"
                       type={showPassword ? "text" : "password"}
+                      name="password"
+                      onChange={formik.handleChange}
+                      value={formik.values.password}
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
@@ -149,6 +215,11 @@ export default function SignUpForm() {
                         <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
                       )}
                     </span>
+                      {formik.touched.password && formik.errors.password && (
+                          <p className="mt-1 text-sm text-red-500">
+                              {formik.errors.password}
+                          </p>
+                      )}
                   </div>
                 </div>
                 {/* <!-- Checkbox --> */}
@@ -176,6 +247,9 @@ export default function SignUpForm() {
                   </button>
                 </div>
               </div>
+                {errorMessage && (
+                    <p className="text-sm text-red-500">{errorMessage}</p>
+                )}
             </form>
 
             <div className="mt-5">

@@ -42,8 +42,15 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
-        UserInfo user = service.registerUser(request);
-        return ResponseEntity.ok("User registered successfully: " + user.getEmail());
+        try{
+            UserInfo user = service.registerUser(request);
+            return ResponseEntity.ok("User registered successfully: " + user.getEmail());
+        }catch(IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
     }
 
     @PostMapping("/generateToken")
