@@ -26,7 +26,7 @@ public class DocumentUtils {
 
             // Configure OCR (Tesseract)
             TesseractOCRConfig tesseractConfig = new TesseractOCRConfig();
-            tesseractConfig.setLanguage("eng"); // You can add 'fra', 'deu', etc.
+            tesseractConfig.setLanguage("eng+fra+deu+ara");
             tesseractConfig.setEnableImagePreprocessing(true);
             tesseractConfig.setPreserveInterwordSpacing(true);
 
