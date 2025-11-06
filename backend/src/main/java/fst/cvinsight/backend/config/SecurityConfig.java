@@ -1,5 +1,6 @@
 package fst.cvinsight.backend.config;
 
+import fst.cvinsight.backend.filter.APIEndpointLoggerFilter;
 import fst.cvinsight.backend.filter.JwtAuthFilter;
 import fst.cvinsight.backend.service.OAuth2SuccessHandler;
 import fst.cvinsight.backend.service.UserInfoService;
@@ -28,16 +29,19 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final APIEndpointLoggerFilter loggerFilter;
     private final UserInfoService userInfoService;
     private final PasswordEncoder encoder;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Autowired
     public SecurityConfig(JwtAuthFilter jwtAuthFilter,
+                          APIEndpointLoggerFilter apiEndpointLoggerFilter,
                           UserInfoService userInfoService,
                           PasswordEncoder encoder,
                           OAuth2SuccessHandler oAuth2SuccessHandler) {
         this.jwtAuthFilter = jwtAuthFilter;
+        this.loggerFilter = apiEndpointLoggerFilter;
         this.userInfoService = userInfoService;
         this.encoder = encoder;
         this.oAuth2SuccessHandler = oAuth2SuccessHandler;
@@ -49,19 +53,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Disable CSRF (not needed for stateless JWT)
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // Configure endpoint authorization
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
-                        .requestMatchers("/auth/welcome", "/auth/register", "/auth/login", "/auth/generateToken").permitAll()
+                        .requestMatchers("/auth/**").permitAll()
 
-                        // Role-based endpoints
-                        .requestMatchers("/auth/user/**").hasAuthority("ROLE_USER")
-                        .requestMatchers("/auth/admin/**").hasAuthority("ROLE_ADMIN")
-
-                        // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
@@ -72,13 +68,12 @@ public class SecurityConfig {
                         .successHandler(oAuth2SuccessHandler)
                 )
 
-                // Stateless session (required for JWT)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authenticationProvider(authenticationProvider())
 
-                // Add JWT filter before Spring Security's default filter
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(loggerFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

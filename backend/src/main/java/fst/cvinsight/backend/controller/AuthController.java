@@ -4,6 +4,7 @@ import fst.cvinsight.backend.model.AuthRequest;
 import fst.cvinsight.backend.entity.UserInfo;
 import fst.cvinsight.backend.model.RegisterRequest;
 import fst.cvinsight.backend.service.JwtService;
+import fst.cvinsight.backend.util.DocumentUtils;
 import fst.cvinsight.backend.service.UserInfoService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -13,7 +14,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -29,15 +29,15 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
 
-    AuthController(UserInfoService service, JwtService jwtService, AuthenticationManager authenticationManager) {
+    AuthController(UserInfoService service, JwtService jwtService, AuthenticationManager authenticationManager, DocumentUtils documentUtils) {
         this.service = service;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
     }
 
-    @GetMapping("/welcome")
+    @GetMapping(value = "/welcome")
     public String welcome() {
-        return "Welcome this endpoint is not secure";
+        return "Welcome to CV Insight Backend!";
     }
 
     @PostMapping("/register")
@@ -53,7 +53,7 @@ public class AuthController {
 
     }
 
-    @PostMapping("/generateToken")
+    @PostMapping("/generate-token")
     public ResponseEntity<?> authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(
