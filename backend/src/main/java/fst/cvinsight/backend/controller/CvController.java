@@ -7,24 +7,26 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/cv")
-class CvController {
+public class CvController {
 
     private final DocumentUtils documentUtils;
 
     @Autowired
-    CvController(DocumentUtils documentUtils) {
+    public CvController(DocumentUtils documentUtils) {
         this.documentUtils = documentUtils;
     }
 
     @PostMapping(value = "/extract", consumes = {"multipart/form-data"})
-    ResponseEntity<?> extractText(
+    public ResponseEntity<?> extractText(
             @RequestPart("cv") MultipartFile cv,
             @RequestParam("name") String name,
             @RequestParam("email") String email) {
-        try{
+
+        try {
             String originalFilename = cv.getOriginalFilename();
             String extension = "";
 
@@ -35,10 +37,19 @@ class CvController {
             File tempFile = File.createTempFile("uploaded-" + cv.getName() + "-", extension);
             cv.transferTo(tempFile);
 
-            return ResponseEntity.ok(documentUtils.extractText(tempFile));
-        }
-        catch(Exception e){
-            return ResponseEntity.internalServerError().body(e.getMessage());
+            String extractedText = documentUtils.extractText(tempFile);
+            return ResponseEntity.ok(extractedText);
+
+        } catch (IOException e) {
+            return ResponseEntity
+                    .status(422) // Unprocessable Entity
+                    .body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .internalServerError()
+                    .body(new ErrorResponse("Unexpected error: " + e.getMessage()));
         }
     }
+
+    private record ErrorResponse(String message) {}
 }

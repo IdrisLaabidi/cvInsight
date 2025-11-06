@@ -7,6 +7,7 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.ocr.TesseractOCRConfig;
 import org.apache.tika.sax.BodyContentHandler;
 import org.springframework.stereotype.Component;
+import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,8 +37,13 @@ public class DocumentUtils {
             parser.parse(stream, handler, metadata, context);
             String text = handler.toString().trim();
 
-            return text.isEmpty() ? "[No text found or OCR failed]" : text;
-        } catch (TikaException | org.xml.sax.SAXException e) {
+            if (text.isEmpty()) {
+                throw new IOException("No text found or OCR failed");
+            }
+
+            return text;
+
+        } catch (TikaException | SAXException e) {
             throw new IOException("Error extracting text: " + e.getMessage(), e);
         }
     }
