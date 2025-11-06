@@ -25,10 +25,18 @@ public class GeneralExceptionHandler {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<?> handleMaxSizeException(MaxUploadSizeExceededException e) {
-        return ResponseEntity
-                .status(HttpStatus.PAYLOAD_TOO_LARGE)
-                .body(new ErrorResponse("File too large. Maximum upload size exceeded."));
+        return buildErrorResponse(HttpStatus.PAYLOAD_TOO_LARGE, "File too large. Maximum upload size exceeded.");
     }
 
-    private record ErrorResponse(String message) {}
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleGeneralException(Exception ex) {
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    }
+
+
+    private ResponseEntity<Object> buildErrorResponse(HttpStatus status, String message) {
+        Map<String, String> errorBody = new HashMap<>();
+        errorBody.put("message", message);
+        return ResponseEntity.status(status).body(errorBody);
+    }
 }

@@ -2,12 +2,16 @@ package fst.cvinsight.backend.filter;
 
 import fst.cvinsight.backend.service.JwtService;
 import fst.cvinsight.backend.service.UserInfoService;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -31,46 +35,31 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain)
-            throws ServletException, IOException {
-
+                                    FilterChain filterChain) throws ServletException, IOException {
         String path = request.getRequestURI();
 
-        if (path.startsWith("/auth/login")
-                || path.startsWith("/auth/register")
-                || path.startsWith("/auth/welcome")
-                || path.startsWith("/auth/generateToken")
-                || path.startsWith("/oauth2/authorization")) {
+        if (path.startsWith("/auth/") || path.startsWith("/oauth2/authorization")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String authHeader = request.getHeader("Authorization");
-
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        String token = authHeader.substring(7);
-        String username;
-
         try {
-            username = jwtService.extractUsername(token);
-        } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or malformed JWT token");
-            return;
-        }
+            String authHeader = request.getHeader("Authorization");
+            String token = null;
+            String username = null;
 
-        try {
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7);
+                username = jwtService.extractUsername(token);
+            }
+
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userInfoService.loadUserByUsername(username);
+
                 if (jwtService.validateToken(token, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
-                                    userDetails,
-                                    null,
-                                    userDetails.getAuthorities());
+                                    userDetails, null, userDetails.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
@@ -78,8 +67,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
 
+        } catch (ExpiredJwtException e) {
+            throw new AuthenticationException("JWT token has expired", e) {};
+        } catch (MalformedJwtException e) {
+            throw new AuthenticationException("JWT token is malformed", e) {};
+        } catch (SignatureException e) {
+            throw new AuthenticationException("JWT signature validation failed", e) {};
         } catch (Exception e) {
-            throw e;
+            throw new AuthenticationException("Authentication failed: " + e.getMessage(), e) {};
         }
     }
 }

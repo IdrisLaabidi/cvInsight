@@ -2,6 +2,7 @@ package fst.cvinsight.backend.config;
 
 import fst.cvinsight.backend.filter.APIEndpointLoggerFilter;
 import fst.cvinsight.backend.filter.JwtAuthFilter;
+import fst.cvinsight.backend.service.CustomAuthenticationEntryPoint;
 import fst.cvinsight.backend.service.OAuth2SuccessHandler;
 import fst.cvinsight.backend.service.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +34,12 @@ public class SecurityConfig {
     private final UserInfoService userInfoService;
     private final PasswordEncoder encoder;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     @Autowired
     public SecurityConfig(JwtAuthFilter jwtAuthFilter,
                           APIEndpointLoggerFilter apiEndpointLoggerFilter,
+                          CustomAuthenticationEntryPoint authenticationEntryPoint,
                           UserInfoService userInfoService,
                           PasswordEncoder encoder,
                           OAuth2SuccessHandler oAuth2SuccessHandler) {
@@ -45,7 +48,9 @@ public class SecurityConfig {
         this.userInfoService = userInfoService;
         this.encoder = encoder;
         this.oAuth2SuccessHandler = oAuth2SuccessHandler;
+        this.authenticationEntryPoint = authenticationEntryPoint;
     }
+
     /*
      * Main security configuration
      * Defines endpoint access rules and JWT filter setup
@@ -54,26 +59,22 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
 
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                        .authenticationEntryPoint(authenticationEntryPoint)
                 )
-
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2Login(oauth -> oauth
                         .successHandler(oAuth2SuccessHandler)
                 )
-
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
                 .authenticationProvider(authenticationProvider())
-
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(loggerFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(loggerFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
