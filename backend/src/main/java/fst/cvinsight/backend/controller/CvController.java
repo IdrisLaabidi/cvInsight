@@ -1,5 +1,6 @@
 package fst.cvinsight.backend.controller;
 
+import fst.cvinsight.backend.service.CvService;
 import fst.cvinsight.backend.util.DocumentUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +15,12 @@ import java.io.IOException;
 public class CvController {
 
     private final DocumentUtils documentUtils;
+    private final CvService cvService;
 
     @Autowired
-    public CvController(DocumentUtils documentUtils) {
+    public CvController(DocumentUtils documentUtils, CvService cvService) {
         this.documentUtils = documentUtils;
+        this.cvService = cvService;
     }
 
     @PostMapping(value = "/extract", consumes = {"multipart/form-data"})
@@ -38,6 +41,8 @@ public class CvController {
             cv.transferTo(tempFile);
 
             String extractedText = documentUtils.extractText(tempFile);
+
+            tempFile.delete();
             return ResponseEntity.ok(extractedText);
 
         } catch (IOException e) {
@@ -48,6 +53,21 @@ public class CvController {
             return ResponseEntity
                     .internalServerError()
                     .body(new ErrorResponse("Unexpected error: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping(value = "/analyze", consumes = {"multipart/form-data"})
+    public ResponseEntity<String> analyzeCv(@RequestPart("file") MultipartFile file) {
+        try {
+            File tempFile = File.createTempFile("cv-", ".pdf");
+            file.transferTo(tempFile);
+
+            String jsonResponse = cvService.extractAndParseCv(tempFile);
+            tempFile.delete();
+
+            return ResponseEntity.ok(jsonResponse);
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().body("Error processing CV: " + e.getMessage());
         }
     }
 
