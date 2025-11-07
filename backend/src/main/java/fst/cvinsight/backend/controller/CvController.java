@@ -59,7 +59,14 @@ public class CvController {
     @PostMapping(value = "/analyze", consumes = {"multipart/form-data"})
     public ResponseEntity<String> analyzeCv(@RequestPart("file") MultipartFile file) {
         try {
-            File tempFile = File.createTempFile("cv-", ".pdf");
+            String originalFilename = file.getOriginalFilename();
+            String extension = "";
+
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+
+            File tempFile = File.createTempFile("uploaded-" + file.getName() + "-", extension);
             file.transferTo(tempFile);
 
             String jsonResponse = cvService.extractAndParseCv(tempFile);

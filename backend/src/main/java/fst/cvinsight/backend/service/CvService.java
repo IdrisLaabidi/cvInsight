@@ -1,5 +1,7 @@
 package fst.cvinsight.backend.service;
 
+import fst.cvinsight.backend.entity.UploadedCV;
+import fst.cvinsight.backend.repo.UploadedCVRepository;
 import fst.cvinsight.backend.util.DocumentUtils;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.PromptTemplate;
@@ -9,18 +11,25 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class CvService {
 
     private final ChatClient chatClient;
     private final DocumentUtils documentUtils;
+    private final UploadedCVRepository uploadedCVRepository;
+    private final UserInfoService userInfoService;
 
     @Autowired
-    public CvService(ChatClient chatClient, DocumentUtils documentUtils) {
+    public CvService(ChatClient chatClient, DocumentUtils documentUtils, UploadedCVRepository uploadedCVRepository, UserInfoService userInfoService) {
         this.chatClient = chatClient;
         this.documentUtils = documentUtils;
+        this.uploadedCVRepository = uploadedCVRepository;
+        this.userInfoService = userInfoService;
     }
 
     public String extractAndParseCv(File cv) throws IOException {
@@ -102,9 +111,27 @@ public class CvService {
 
         String prompt = promptTemplate.render(Map.of("cvContent", cvContent));
 
-        return chatClient.prompt(prompt)
+        String result =  chatClient.prompt(prompt)
                 .call()
                 .content();
+
+        saveCV(cv);
+
+        return result;
+    }
+
+    public List<UploadedCV> getUploadedCVsByUserId(UUID userId) {
+        return uploadedCVRepository.findAllByUserId(userId);
+    }
+
+    private void saveCV(File cv) throws IOException {
+        UploadedCV uploadedCV = new UploadedCV();
+        uploadedCV.setFilename(cv.getName());
+        uploadedCV.setContentType(Files.probeContentType(cv.toPath()));
+        uploadedCV.setSize(cv.length());
+        uploadedCV.setUploadedBy(userInfoService.getCurrentUser());
+        uploadedCV.setFileData(Files.readAllBytes(cv.toPath()));
+        uploadedCVRepository.save(uploadedCV);
     }
 
 }

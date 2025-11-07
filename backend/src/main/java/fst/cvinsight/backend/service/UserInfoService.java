@@ -5,6 +5,8 @@ import fst.cvinsight.backend.model.AuthProvider;
 import fst.cvinsight.backend.model.RegisterRequest;
 import fst.cvinsight.backend.repo.UserInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -74,5 +76,11 @@ public class UserInfoService implements UserDetailsService {
         newUser.setRoles("ROLE_USER");
 
         return repository.save(newUser);
+    }
+
+    public UserInfo getCurrentUser(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return repository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + authentication.getName()));
     }
 }
