@@ -4,6 +4,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -16,6 +18,8 @@ import java.util.stream.Collectors;
 @Component
 public class APIEndpointLoggerFilter extends OncePerRequestFilter {
 
+    private final Logger log= LoggerFactory.getLogger(APIEndpointLoggerFilter.class);
+
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -27,22 +31,16 @@ public class APIEndpointLoggerFilter extends OncePerRequestFilter {
         String uri = request.getRequestURI();
         String query = request.getQueryString() != null ? "?" + request.getQueryString() : "";
         String clientIp = request.getRemoteAddr();
-
-        // Optional: log headers (useful for debugging)
         String headers = getHeadersAsString(request);
 
-        try {
-            filterChain.doFilter(request, response);
-        } finally {
-            Instant end = Instant.now();
-            long durationMs = Duration.between(start, end).toMillis();
-            int status = response.getStatus();
+        log.info("[API REQUEST] {} {}{} | IP: {} | Headers: {}", method, uri, query, clientIp, headers);
 
-            logger.info(String.format(
-                    "[API LOG] %s %s%s | Status: %d | IP: %s | Duration: %d ms | Headers: %s",
-                    method, uri, query, status, clientIp, durationMs, headers
-            ));
-        }
+        filterChain.doFilter(request, response);
+
+        Instant end = Instant.now();
+        long durationMs = Duration.between(start, end).toMillis();
+        int status = response.getStatus();
+        log.info("[API RESPONSE] {} {}{} -> Status: {} | IP: {} | Duration: {} ms | Headers: {}", method, uri, query, status, clientIp, durationMs, headers);
     }
 
     private String getHeadersAsString(HttpServletRequest request) {
