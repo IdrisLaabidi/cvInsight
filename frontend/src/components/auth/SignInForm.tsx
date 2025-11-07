@@ -40,7 +40,7 @@ export default function SignInForm() {
         }),
         onSubmit: (values) => {
             setErrorMessage(null);
-            axiosInstance.post("/auth/generate-token", values).then(
+            axiosInstance.post("/auth/login", values).then(
                 res => {
                     const token = res.data.token;
                     localStorage.setItem("jwt", token);

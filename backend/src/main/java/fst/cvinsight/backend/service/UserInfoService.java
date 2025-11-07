@@ -40,12 +40,6 @@ public class UserInfoService implements UserDetailsService {
         return new UserInfoDetails(user);
     }
 
-    public String addUser(UserInfo userInfo) {
-        userInfo.setPassword(encoder.encode(userInfo.getPassword()));
-        repository.save(userInfo);
-        return "User added successfully!";
-    }
-
     @Transactional
     public UserInfo findOrCreateOAuthUser(String email, String name,AuthProvider authProvider) {
         return repository.findByEmail(email)
@@ -82,5 +76,10 @@ public class UserInfoService implements UserDetailsService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return repository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + authentication.getName()));
+    }
+
+    public UserInfo getUserByEmail(String email){
+        return repository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 }

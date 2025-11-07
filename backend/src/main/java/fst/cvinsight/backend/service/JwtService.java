@@ -1,6 +1,7 @@
 package fst.cvinsight.backend.service;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -69,5 +70,30 @@ public class JwtService {
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    public String extractUsernameAllowExpired(String token) {
+        try {
+            return Jwts.parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .getSubject();
+        } catch (ExpiredJwtException ex) {
+            Date expiration = ex.getClaims().getExpiration();
+
+            long now = System.currentTimeMillis();
+            long expiredSince = now - expiration.getTime();
+            long maxAllowedAge = 1000L * 60 * 60 * 24 * 7; // 7 days
+
+            if (expiredSince > maxAllowedAge) {
+                return null;
+            }
+
+            return ex.getClaims().getSubject();
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
