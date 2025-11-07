@@ -1,6 +1,9 @@
 package fst.cvinsight.backend.service;
 
 import fst.cvinsight.backend.entity.UploadedCV;
+import fst.cvinsight.backend.exception.CVAnalysisException;
+import fst.cvinsight.backend.exception.CVExtractionException;
+import fst.cvinsight.backend.exception.CVStorageException;
 import fst.cvinsight.backend.repo.UploadedCVRepository;
 import fst.cvinsight.backend.util.DocumentUtils;
 import org.springframework.ai.chat.client.ChatClient;
@@ -17,7 +20,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
-public class CvService {
+public class CVService {
 
     private final ChatClient chatClient;
     private final DocumentUtils documentUtils;
@@ -25,16 +28,55 @@ public class CvService {
     private final UserInfoService userInfoService;
 
     @Autowired
-    public CvService(ChatClient chatClient, DocumentUtils documentUtils, UploadedCVRepository uploadedCVRepository, UserInfoService userInfoService) {
+    public CVService(ChatClient chatClient, DocumentUtils documentUtils, UploadedCVRepository uploadedCVRepository, UserInfoService userInfoService) {
         this.chatClient = chatClient;
         this.documentUtils = documentUtils;
         this.uploadedCVRepository = uploadedCVRepository;
         this.userInfoService = userInfoService;
     }
 
-    public String extractAndParseCv(File cv) throws IOException {
-        String cvContent = documentUtils.extractText(cv);
+    public String extractAndParseCV(File cv) throws IOException {
+        String cvContent;
+        try{
+            cvContent = documentUtils.extractText(cv);
+        } catch (IOException e) {
+            throw new CVExtractionException(e);
+        }
 
+        String result;
+        try {
+            String prompt = buildAnalysisPrompt(cvContent);
+            result =  chatClient.prompt(prompt)
+                    .call()
+                    .content();
+        } catch (Exception e) {
+            throw new CVAnalysisException(e);
+        }
+
+        saveCV(cv);
+
+        return result;
+    }
+
+    public List<UploadedCV> getUploadedCVsByUserId(UUID userId) {
+        return uploadedCVRepository.findAllByUserId(userId);
+    }
+
+    public void saveCV(File cv) throws CVStorageException {
+        try{
+            UploadedCV uploadedCV = new UploadedCV();
+            uploadedCV.setFilename(cv.getName());
+            uploadedCV.setContentType(Files.probeContentType(cv.toPath()));
+            uploadedCV.setSize(cv.length());
+            uploadedCV.setUploadedBy(userInfoService.getCurrentUser());
+            uploadedCV.setFileData(Files.readAllBytes(cv.toPath()));
+            uploadedCVRepository.save(uploadedCV);
+        } catch (Exception e) {
+            throw new CVStorageException(e);
+        }
+    }
+
+    private String buildAnalysisPrompt(String cvContent) {
         PromptTemplate promptTemplate = PromptTemplate.builder()
                 .renderer(StTemplateRenderer.builder().startDelimiterToken('<').endDelimiterToken('>').build())
                 .template("""
@@ -109,29 +151,7 @@ public class CvService {
                     """)
                 .build();
 
-        String prompt = promptTemplate.render(Map.of("cvContent", cvContent));
-
-        String result =  chatClient.prompt(prompt)
-                .call()
-                .content();
-
-        saveCV(cv);
-
-        return result;
-    }
-
-    public List<UploadedCV> getUploadedCVsByUserId(UUID userId) {
-        return uploadedCVRepository.findAllByUserId(userId);
-    }
-
-    private void saveCV(File cv) throws IOException {
-        UploadedCV uploadedCV = new UploadedCV();
-        uploadedCV.setFilename(cv.getName());
-        uploadedCV.setContentType(Files.probeContentType(cv.toPath()));
-        uploadedCV.setSize(cv.length());
-        uploadedCV.setUploadedBy(userInfoService.getCurrentUser());
-        uploadedCV.setFileData(Files.readAllBytes(cv.toPath()));
-        uploadedCVRepository.save(uploadedCV);
+        return promptTemplate.render(Map.of("cvContent", cvContent));
     }
 
 }
