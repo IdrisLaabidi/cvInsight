@@ -1,5 +1,8 @@
 package fst.cvinsight.backend.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fst.cvinsight.backend.entity.UploadedCV;
 import fst.cvinsight.backend.exception.CVAnalysisException;
 import fst.cvinsight.backend.exception.CVExtractionException;
@@ -26,13 +29,15 @@ public class CVService {
     private final DocumentUtils documentUtils;
     private final UploadedCVRepository uploadedCVRepository;
     private final UserInfoService userInfoService;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public CVService(ChatClient chatClient, DocumentUtils documentUtils, UploadedCVRepository uploadedCVRepository, UserInfoService userInfoService) {
+    public CVService(ChatClient chatClient, DocumentUtils documentUtils, UploadedCVRepository uploadedCVRepository, UserInfoService userInfoService, ObjectMapper objectMapper) {
         this.chatClient = chatClient;
         this.documentUtils = documentUtils;
         this.uploadedCVRepository = uploadedCVRepository;
         this.userInfoService = userInfoService;
+        this.objectMapper = objectMapper;
     }
 
     public String extractAndParseCV(File cv) throws IOException {
@@ -53,7 +58,7 @@ public class CVService {
             throw new CVAnalysisException(e);
         }
 
-        saveCV(cv);
+        saveCV(cv, result);
 
         return result;
     }
@@ -62,16 +67,22 @@ public class CVService {
         return uploadedCVRepository.findAllByUserId(userId);
     }
 
-    public void saveCV(File cv) throws CVStorageException {
-        try{
+    public void saveCV(File cv, String jsonContent) throws CVStorageException {
+        try {
             UploadedCV uploadedCV = new UploadedCV();
+
+            JsonNode parsed = objectMapper.readTree(jsonContent);
+
             uploadedCV.setFilename(cv.getName());
             uploadedCV.setContentType(Files.probeContentType(cv.toPath()));
             uploadedCV.setSize(cv.length());
             uploadedCV.setUploadedBy(userInfoService.getCurrentUser());
             uploadedCV.setFileData(Files.readAllBytes(cv.toPath()));
+            uploadedCV.setJsonContent(parsed);
             uploadedCVRepository.save(uploadedCV);
-        } catch (Exception e) {
+        }catch (JsonProcessingException e){
+            throw new CVAnalysisException(e);
+        } catch (IOException e) {
             throw new CVStorageException(e);
         }
     }

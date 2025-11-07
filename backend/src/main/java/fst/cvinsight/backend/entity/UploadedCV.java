@@ -1,9 +1,12 @@
 package fst.cvinsight.backend.entity;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.vladmihalcea.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -24,4 +27,7 @@ public class UploadedCV {
     private UserInfo uploadedBy;
     private LocalDateTime uploadedAt = LocalDateTime.now();
     private byte[] fileData;
+    @Type(JsonType.class)
+    @Column(columnDefinition = "jsonb")
+    private JsonNode jsonContent;
 }
