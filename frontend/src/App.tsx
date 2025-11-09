@@ -20,50 +20,53 @@ import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
 import LoginSuccessful from "./pages/AuthPages/LoginSuccessful.tsx";
 import Landing from "./pages/Landing.tsx";
+import {AuthProvider} from "./context/AuthContext.tsx";
 
 export default function App() {
   return (
     <>
       <Router>
         <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          {/* Dashboard Layout */}
-          <Route element={<AppLayout />}>
-            <Route index path="/home" element={<Home />} />
+          <AuthProvider>
+              <Routes>
+                  <Route path="/" element={<Landing />} />
+                  {/* Dashboard Layout */}
+                  <Route element={<AppLayout />}>
+                      <Route index path="/home" element={<Home />} />
 
-            {/* Others Page */}
-            <Route path="/profile" element={<UserProfiles />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/blank" element={<Blank />} />
+                      {/* Others Page */}
+                      <Route path="/profile" element={<UserProfiles />} />
+                      <Route path="/calendar" element={<Calendar />} />
+                      <Route path="/blank" element={<Blank />} />
 
-            {/* Forms */}
-            <Route path="/form-elements" element={<FormElements />} />
+                      {/* Forms */}
+                      <Route path="/form-elements" element={<FormElements />} />
 
-            {/* Tables */}
-            <Route path="/basic-tables" element={<BasicTables />} />
+                      {/* Tables */}
+                      <Route path="/basic-tables" element={<BasicTables />} />
 
-            {/* Ui Elements */}
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/avatars" element={<Avatars />} />
-            <Route path="/badge" element={<Badges />} />
-            <Route path="/buttons" element={<Buttons />} />
-            <Route path="/images" element={<Images />} />
-            <Route path="/videos" element={<Videos />} />
+                      {/* Ui Elements */}
+                      <Route path="/alerts" element={<Alerts />} />
+                      <Route path="/avatars" element={<Avatars />} />
+                      <Route path="/badge" element={<Badges />} />
+                      <Route path="/buttons" element={<Buttons />} />
+                      <Route path="/images" element={<Images />} />
+                      <Route path="/videos" element={<Videos />} />
 
-            {/* Charts */}
-            <Route path="/line-chart" element={<LineChart />} />
-            <Route path="/bar-chart" element={<BarChart />} />
-          </Route>
+                      {/* Charts */}
+                      <Route path="/line-chart" element={<LineChart />} />
+                      <Route path="/bar-chart" element={<BarChart />} />
+                  </Route>
 
-          {/* Auth Layout */}
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/login/success" element={<LoginSuccessful />}/>
+                  {/* Auth Layout */}
+                  <Route path="/signin" element={<SignIn />} />
+                  <Route path="/signup" element={<SignUp />} />
+                  <Route path="/login/success" element={<LoginSuccessful />}/>
 
-          {/* Fallback Route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+                  {/* Fallback Route */}
+                  <Route path="*" element={<NotFound />} />
+              </Routes>
+          </AuthProvider>
       </Router>
     </>
   );

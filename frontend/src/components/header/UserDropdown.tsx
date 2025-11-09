@@ -2,9 +2,12 @@ import { useState } from "react";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { Link } from "react-router";
+import {useAuth} from "../../context/AuthContext.tsx";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
+  const auth = useAuth();
+
 
   function toggleDropdown() {
     setIsOpen(!isOpen);
@@ -23,7 +26,7 @@ export default function UserDropdown() {
           <img src="/images/user/owner.jpg" alt="User" />
         </span>
 
-        <span className="block mr-1 font-medium text-theme-sm">Musharof</span>
+        <span className="block mr-1 font-medium text-theme-sm">{auth.user?.username || "John Doe"}</span>
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
@@ -51,10 +54,10 @@ export default function UserDropdown() {
       >
         <div>
           <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            Musharof Chowdhury
+            {auth.user?.username || "John Doe"}
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            randomuser@pimjo.com
+            {auth.user?.email || "johndoe@example.com"}
           </span>
         </div>
 
