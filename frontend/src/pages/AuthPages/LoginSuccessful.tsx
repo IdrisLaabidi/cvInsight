@@ -19,7 +19,7 @@ export default function LoginSuccessful() {
             localStorage.setItem("jwt", jwt);
 
             setTimeout(()=> {
-                navigate("/dashboard");
+                navigate("/home");
             }, 3000);
         } else {
             setError(true);

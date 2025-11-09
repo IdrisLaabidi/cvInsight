@@ -52,7 +52,7 @@ export default function SignUpForm() {
           }).then(
               res => {
                   if(res.status == 200) {
-                      navigate("/dashboard");
+                      navigate("/home");
                   }
               }
           ).catch(err => {

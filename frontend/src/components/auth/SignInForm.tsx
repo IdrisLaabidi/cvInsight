@@ -44,7 +44,7 @@ export default function SignInForm() {
                 res => {
                     const token = res.data.token;
                     localStorage.setItem("jwt", token);
-                    navigate("/dashboard");
+                    navigate("/home");
                 }
             ).catch((error) => {
                 setErrorMessage(
