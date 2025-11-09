@@ -1,13 +1,16 @@
 package fst.cvinsight.backend.controller;
 
+import fst.cvinsight.backend.mapper.UserInfoMapper;
 import fst.cvinsight.backend.model.AuthRequest;
 import fst.cvinsight.backend.entity.UserInfo;
 import fst.cvinsight.backend.model.RegisterRequest;
 import fst.cvinsight.backend.service.JwtService;
 import fst.cvinsight.backend.util.DocumentUtils;
 import fst.cvinsight.backend.service.UserInfoService;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,10 +32,18 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
 
-    AuthController(UserInfoService service, JwtService jwtService, AuthenticationManager authenticationManager, DocumentUtils documentUtils) {
+    private final UserInfoMapper userInfoMapper;
+
+    @Autowired
+    AuthController(
+            UserInfoService service,
+            JwtService jwtService,
+            AuthenticationManager authenticationManager,
+            UserInfoMapper userInfoMapper) {
         this.service = service;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
+        this.userInfoMapper = userInfoMapper;
     }
 
     @GetMapping(value = "/welcome")
@@ -61,8 +72,9 @@ public class AuthController {
             );
             if (authentication.isAuthenticated()) {
                 String token = jwtService.generateToken(authRequest.getEmail());
+                UserInfo user = service.getUserByEmail(authRequest.getEmail());
 
-                return ResponseEntity.ok(Map.of("token", token));
+                return ResponseEntity.ok(Map.of("token", token, "user", userInfoMapper.toUserInfoDto(user) ));
             } else {
                 throw new UsernameNotFoundException("Invalid user request!");
             }
@@ -99,6 +111,27 @@ public class AuthController {
             return ResponseEntity.ok(Map.of("token", newToken));
         }catch (UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(HttpServletRequest request){
+        try {
+            String authorization = request.getHeader("Authorization");
+
+            if (authorization == null || !authorization.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Missing or invalid Authorization header"));
+            }
+
+            String token = authorization.substring(7);
+            String email = jwtService.extractUsername(token);
+            UserInfo user = service.getUserByEmail(email);
+            return ResponseEntity.ok(Map.of("user",userInfoMapper.toUserInfoDto(user)));
+        }catch (UsernameNotFoundException | JwtException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

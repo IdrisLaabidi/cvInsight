@@ -29,6 +29,8 @@
     <properties>
         <java.version>21</java.version>
         <spring-ai.version>1.0.3</spring-ai.version>
+        <mapstruct.version>1.6.3</mapstruct.version>
+        <apache-tika.version>3.2.3</apache-tika.version>
     </properties>
     <dependencies>
         <dependency>
@@ -115,31 +117,41 @@
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-core</artifactId>
-            <version>3.2.3</version>
+            <version>${apache-tika.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-parser-microsoft-module -->
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-parser-microsoft-module</artifactId>
-            <version>3.2.3</version>
+            <version>${apache-tika.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-parser-pdf-module -->
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-parser-pdf-module</artifactId>
-            <version>3.2.3</version>
+            <version>${apache-tika.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-parsers-standard-package -->
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-parsers-standard-package</artifactId>
-            <version>3.2.3</version>
+            <version>${apache-tika.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.vladmihalcea/hibernate-types-60 -->
         <dependency>
             <groupId>com.vladmihalcea</groupId>
             <artifactId>hibernate-types-60</artifactId>
             <version>2.21.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>${mapstruct.version}</version>
         </dependency>
     </dependencies>
     <dependencyManagement>
@@ -168,6 +180,11 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
+                        </path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapstruct.version}</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
