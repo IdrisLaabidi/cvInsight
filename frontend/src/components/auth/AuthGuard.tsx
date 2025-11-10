@@ -2,7 +2,7 @@ import React from "react";
 import {useAuth} from "../../context/AuthContext.tsx";
 import {Navigate, Outlet} from "react-router";
 
-
+//This is auth component to protect routes
 const AuthGuard: React.FC = () => {
     const { isAuthenticated } = useAuth();
 
