@@ -14,6 +14,19 @@ export default {
       ...defaultTheme.screens,
     },
     extend: {
+        keyframes: {
+            typing: {
+                from: { width: '0%' },
+                to: { width: '100%' },
+            },
+            blink: {
+                '50%': { borderColor: 'transparent' },
+            },
+        },
+        animation: {
+            typing: 'typing 3s steps(30, end) forwards',
+            blink: 'blink 0.75s step-end infinite',
+        },
       fontSize: {
         "title-2xl": ["72px", "90px"],
         "title-xl": ["60px", "72px"],
