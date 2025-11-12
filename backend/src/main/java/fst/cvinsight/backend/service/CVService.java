@@ -9,10 +9,12 @@ import fst.cvinsight.backend.exception.CVExtractionException;
 import fst.cvinsight.backend.exception.CVStorageException;
 import fst.cvinsight.backend.repo.UploadedCVRepository;
 import fst.cvinsight.backend.util.DocumentUtils;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.template.st.StTemplateRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -61,10 +63,6 @@ public class CVService {
         saveCV(cv, result);
 
         return result;
-    }
-
-    public List<UploadedCV> getUploadedCVsByUserId(UUID userId) {
-        return uploadedCVRepository.findAllByUserId(userId);
     }
 
     public void saveCV(File cv, String jsonContent) throws CVStorageException {
@@ -163,6 +161,26 @@ public class CVService {
                 .build();
 
         return promptTemplate.render(Map.of("cvContent", cvContent));
+    }
+
+    public UploadedCV getCVById(UUID id) {
+        UUID userId = userInfoService.getCurrentUser().getId();
+        UploadedCV cv = uploadedCVRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("CV not found"));
+        if (!cv.getUploadedBy().getId().equals(userId)) {
+            throw new AccessDeniedException("You are not allowed to access this CV");
+        }
+        return cv;
+    }
+
+    public void deleteCV(UUID id) {
+        UploadedCV existing = getCVById(id);
+        uploadedCVRepository.delete(existing);
+    }
+
+    public List<UploadedCV> getAllCVsForCurrentUser() {
+        UUID userId = userInfoService.getCurrentUser().getId();
+        return uploadedCVRepository.findAllByUserId(userId);
     }
 
 }

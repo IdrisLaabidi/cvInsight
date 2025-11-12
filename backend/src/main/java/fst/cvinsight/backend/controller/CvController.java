@@ -1,5 +1,6 @@
 package fst.cvinsight.backend.controller;
 
+import fst.cvinsight.backend.entity.UploadedCV;
 import fst.cvinsight.backend.exception.CVProcessingException;
 import fst.cvinsight.backend.service.CVService;
 import fst.cvinsight.backend.util.DocumentUtils;
@@ -11,7 +12,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/cv")
@@ -27,21 +30,18 @@ public class CvController {
     }
 
     @PostMapping(value = "/extract", consumes = {"multipart/form-data"})
-    public ResponseEntity<?> extractText(
-            @RequestPart("cv") MultipartFile cv,
-            @RequestParam("name") String name,
-            @RequestParam("email") String email) {
+    public ResponseEntity<?> extractText(@RequestPart("file") MultipartFile file) {
 
         try {
-            String originalFilename = cv.getOriginalFilename();
+            String originalFilename = file.getOriginalFilename();
             String extension = "";
 
             if (originalFilename != null && originalFilename.contains(".")) {
                 extension = originalFilename.substring(originalFilename.lastIndexOf("."));
             }
 
-            File tempFile = File.createTempFile("uploaded-" + cv.getName() + "-", extension);
-            cv.transferTo(tempFile);
+            File tempFile = File.createTempFile("uploaded-" + file.getName() + "-", extension);
+            file.transferTo(tempFile);
 
             String extractedText = documentUtils.extractText(tempFile);
 
@@ -83,6 +83,22 @@ public class CvController {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "File upload error", "details", e.getMessage()));
         }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCV(@PathVariable UUID id) {
+        cvService.deleteCV(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UploadedCV>> getAllCVsForUser() {
+        return ResponseEntity.ok(cvService.getAllCVsForCurrentUser());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UploadedCV> getCVById(@PathVariable UUID id) {
+        return ResponseEntity.ok(cvService.getCVById(id));
     }
 
     private record ErrorResponse(String message) {}
