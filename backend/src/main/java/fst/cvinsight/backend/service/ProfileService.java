@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 @Service
 @RequiredArgsConstructor
@@ -46,38 +47,33 @@ public class ProfileService {
                     return p;
                 });
 
-        profile.setFirstName(profileData.getFirstName());
-        profile.setLastName(profileData.getLastName());
-        profile.setPhone(profileData.getPhone());
-        profile.setBirthDate(profileData.getBirthDate());
-        profile.setGender(profileData.getGender());
-        profile.setBio(profileData.getBio());
+        updateIfNotNull(profile::setFirstName, profileData.getFirstName());
+        updateIfNotNull(profile::setLastName, profileData.getLastName());
+        updateIfNotNull(profile::setPhone, profileData.getPhone());
+        updateIfNotNull(profile::setBirthDate, profileData.getBirthDate());
+        updateIfNotNull(profile::setGender, profileData.getGender());
+        updateIfNotNull(profile::setBio, profileData.getBio());
 
-        if (profile.getAddress() == null) {
-            profile.setAddress(new UserAddress());
-        }
-        UserAddress newAddress = profileData.getAddress();
-        if (newAddress != null) {
-            profile.getAddress().setPostalCode(newAddress.getPostalCode());
-            profile.getAddress().setCity(newAddress.getCity());
-            profile.getAddress().setCountry(newAddress.getCountry());
+        if (profile.getAddress() == null) profile.setAddress(new UserAddress());
+        UserAddress addressData = profileData.getAddress();
+        if (addressData != null) {
+            updateIfNotNull(profile.getAddress()::setPostalCode, addressData.getPostalCode());
+            updateIfNotNull(profile.getAddress()::setCity, addressData.getCity());
+            updateIfNotNull(profile.getAddress()::setCountry, addressData.getCountry());
         }
 
-        if (profile.getSocialLinks() == null) {
-            profile.setSocialLinks(new UserSocialLinks());
-        }
-        UserSocialLinks newSocialLinks = profileData.getSocialLinks();
-        if (newSocialLinks != null) {
-            profile.getSocialLinks().setFacebook(newSocialLinks.getFacebook());
-            profile.getSocialLinks().setLinkedin(newSocialLinks.getLinkedin());
-            profile.getSocialLinks().setTwitter(newSocialLinks.getTwitter());
-            profile.getSocialLinks().setGithub(newSocialLinks.getGithub());
-            profile.getSocialLinks().setInstagram(newSocialLinks.getInstagram());
+        if (profile.getSocialLinks() == null) profile.setSocialLinks(new UserSocialLinks());
+        UserSocialLinks socialLinksData = profileData.getSocialLinks();
+        if (socialLinksData != null) {
+            updateIfNotNull(profile.getSocialLinks()::setFacebook, socialLinksData.getFacebook());
+            updateIfNotNull(profile.getSocialLinks()::setLinkedin, socialLinksData.getLinkedin());
+            updateIfNotNull(profile.getSocialLinks()::setTwitter, socialLinksData.getTwitter());
+            updateIfNotNull(profile.getSocialLinks()::setGithub, socialLinksData.getGithub());
+            updateIfNotNull(profile.getSocialLinks()::setInstagram, socialLinksData.getInstagram());
         }
 
         return userProfileRepository.save(profile);
     }
-
 
     /**
      * Delete current user's profile
@@ -85,6 +81,10 @@ public class ProfileService {
     public void deleteCurrentUserProfile() {
         var currentUser = userInfoService.getCurrentUser();
         userProfileRepository.findByUser(currentUser).ifPresent(userProfileRepository::delete);
+    }
+
+    private <T> void updateIfNotNull(Consumer<T> setter, T value) {
+        if (value != null) setter.accept(value);
     }
 }
 
