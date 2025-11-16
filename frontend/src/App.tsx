@@ -22,6 +22,7 @@ import LoginSuccessful from "./pages/AuthPages/LoginSuccessful.tsx";
 import Landing from "./pages/Landing.tsx";
 import {AuthProvider} from "./context/AuthContext.tsx";
 import AuthGuard from "./components/auth/AuthGuard.tsx";
+import ResumeBuilder from "./pages/ResumeBuilders/ResumeBuilder.tsx";
 
 export default function App() {
   return (
@@ -59,6 +60,8 @@ export default function App() {
                           {/* Charts */}
                           <Route path="/line-chart" element={<LineChart />} />
                           <Route path="/bar-chart" element={<BarChart />} />
+
+                          <Route path="/resume-builder" element={<ResumeBuilder />} />
                       </Route>
                   </Route>
 

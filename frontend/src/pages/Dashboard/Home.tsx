@@ -5,6 +5,7 @@ import MonthlyTarget from "../../components/ecommerce/MonthlyTarget";
 import RecentOrders from "../../components/ecommerce/RecentOrders";
 import DemographicCard from "../../components/ecommerce/DemographicCard";
 import PageMeta from "../../components/common/PageMeta";
+import {Link} from "react-router";
 
 export default function Home() {
   return (
@@ -15,7 +16,13 @@ export default function Home() {
       />
       <div className="grid grid-cols-12 gap-4 md:gap-6">
         <div className="col-span-12 space-y-6 xl:col-span-7">
-          <EcommerceMetrics />
+            <Link
+                to="/resume-builder"
+                className="rounded bg-primary px-4 py-2 text-white"
+            >
+                Build Your CV
+            </Link>
+            <EcommerceMetrics />
 
           <MonthlySalesChart />
         </div>
