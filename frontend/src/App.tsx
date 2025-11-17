@@ -27,6 +27,7 @@ import CvExtractionPage from "./pages/CVExtractionpage/CvExtractionPage.tsx";
 import CvAnalysis from "./pages/CVAnalysis/CvAnalysis.tsx";
 import Recommandation from "./pages/RecommandationPage/Recommandation.tsx";
 
+import ResumeBuilder from "./pages/ResumeBuilders/ResumeBuilder.tsx";
 
 export default function App() {
   return (
@@ -71,6 +72,8 @@ export default function App() {
                           {/* Charts */}
                           <Route path="/line-chart" element={<LineChart />} />
                           <Route path="/bar-chart" element={<BarChart />} />
+
+                          <Route path="/resume-builder" element={<ResumeBuilder />} />
                       </Route>
                   </Route>
 
