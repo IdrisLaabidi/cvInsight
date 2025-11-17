@@ -22,7 +22,7 @@ const navItems = [
     },
     {
         name: "CV Builder",
-        path: "/CvBuilder",
+        path: "/resume-builder",
         icon: <UserCircleIcon />,
     },
     {
