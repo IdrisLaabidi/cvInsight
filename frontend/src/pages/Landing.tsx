@@ -34,27 +34,12 @@ const Landing: React.FC = () => {
                 </div>
 
                 <div className="flex items-center space-x-8">
-                    <Link
-                        to="/features"
-                        className="text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors font-medium"
-                    >
-                        Features
-                    </Link>
-                    <Link
-                        to="/pricing"
-                        className="text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors font-medium"
-                    >
-                        Pricing
-                    </Link>
-                    <Link
-                        to="/docs"
-                        className="text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors font-medium"
-                    >
-                        Documentation
-                    </Link>
+
+
+
                     <Link
                         to="/signin"
-                        className="px-6 py-2.5 text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors font-medium"
+                        className="px-10 py-2.5 text-gray-600 dark:text-gray-250 hover:text-blue-500 dark:hover:text-blue-400 transition-colors font-medium"
                     >
                         Sign In
                     </Link>

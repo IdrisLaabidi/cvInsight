@@ -22,6 +22,11 @@ import LoginSuccessful from "./pages/AuthPages/LoginSuccessful.tsx";
 import Landing from "./pages/Landing.tsx";
 import {AuthProvider} from "./context/AuthContext.tsx";
 import AuthGuard from "./components/auth/AuthGuard.tsx";
+import CvBuilder from "./pages/CvBuilderPage/CvBuilder.tsx";
+import CvExtractionPage from "./pages/CVExtractionpage/CvExtractionPage.tsx";
+import CvAnalysis from "./pages/CVAnalysis/CvAnalysis.tsx";
+import Recommandation from "./pages/RecommandationPage/Recommandation.tsx";
+
 
 export default function App() {
   return (
@@ -41,6 +46,13 @@ export default function App() {
                           <Route path="/profile" element={<UserProfiles />} />
                           <Route path="/calendar" element={<Calendar />} />
                           <Route path="/blank" element={<Blank />} />
+                          <Route path="/Cvbuilder" element={<CvBuilder />}/>
+                          <Route path="/CvExtractionPage" element={<CvExtractionPage />}/>
+                          <Route path="/CvAnalysis" element={<CvAnalysis />}/>
+                          <Route path="/Recommendation" element={<Recommandation/>}/>
+
+
+
 
                           {/* Forms */}
                           <Route path="/form-elements" element={<FormElements />} />

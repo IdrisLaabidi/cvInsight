@@ -3,9 +3,11 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
+import  {useAuth} from "../../context/AuthContext.tsx";
 
 export default function UserInfoCard() {
   const { isOpen, openModal, closeModal } = useModal();
+  const auth=useAuth();
   const handleSave = () => {
     // Handle save logic here
     console.log("Saving changes...");
@@ -25,7 +27,7 @@ export default function UserInfoCard() {
                 First Name
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Musharof
+                  {auth.user?.username.split(" ")[0]}
               </p>
             </div>
 
@@ -34,7 +36,7 @@ export default function UserInfoCard() {
                 Last Name
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Chowdhury
+                  {auth.user?.username.split(" ")[1]}
               </p>
             </div>
 
@@ -43,7 +45,7 @@ export default function UserInfoCard() {
                 Email address
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                randomuser@pimjo.com
+                  {auth.user?.email}
               </p>
             </div>
 
@@ -61,7 +63,7 @@ export default function UserInfoCard() {
                 Bio
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Team Manager
+                  {auth.user?.role}
               </p>
             </div>
           </div>
