@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import axiosInstance from "../../utils/axiosInstance.ts";
@@ -8,12 +8,13 @@ import Label from "../form/Label.tsx";
 import Checkbox from "../form/input/Checkbox.tsx";
 import Button from "../ui/button/Button.tsx";
 import InputField from "../form/input/InputField.tsx";
+import {useAuth} from "../../context/AuthContext.tsx";
 
 export default function SignInForm() {
     const [showPassword, setShowPassword] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const navigate = useNavigate();
+    const auth= useAuth();
 
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -43,8 +44,8 @@ export default function SignInForm() {
             axiosInstance.post("/auth/login", values).then(
                 res => {
                     const token = res.data.token;
-                    localStorage.setItem("jwt", token);
-                    navigate("/home");
+                    const user = res.data.user;
+                    auth.login(user, token);
                 }
             ).catch((error) => {
                 setErrorMessage(

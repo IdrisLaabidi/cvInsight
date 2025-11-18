@@ -13,6 +13,8 @@ type AuthContextType = {
     setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
     setUserProfile: React.Dispatch<React.SetStateAction<UserProfile | null | undefined>>;
     refreshProfile: () => Promise<void>;
+    logout: () => void;
+    login: (user: User, jwt: string) => void;
 }
 
 export interface User{
@@ -37,13 +39,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
         }
     };
 
+    const logout = () => {
+        localStorage.removeItem("jwt");
+        localStorage.removeItem("user");
+        setUser(undefined);
+        setIsAuthenticated(false);
+        setUserProfile(undefined);
+        navigate("/signin");
+    }
+
+    const login= (user: User, jwt: string) => {
+        localStorage.setItem("jwt", jwt);
+        localStorage.setItem("user", JSON.stringify(user));
+        setUser(user);
+        setIsAuthenticated(true);
+        refreshProfile();
+        navigate("/home");
+    }
+
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
             const parsedUser = JSON.parse(storedUser);
             setUser(parsedUser);
             setIsAuthenticated(true);
-            // Load profile after setting user
             refreshProfile();
             return;
         }
@@ -59,7 +78,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
                 setUser(fetchedUser);
                 setIsAuthenticated(true);
                 localStorage.setItem("user", JSON.stringify(fetchedUser));
-                // Load profile after user is set
                 refreshProfile();
             }).catch((error) => {
                 console.error("Error fetching user data:", error);
@@ -80,7 +98,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
             setUser,
             setIsAuthenticated,
             setUserProfile,
-            refreshProfile
+            refreshProfile,
+            logout,
+            login
         }}>
             {children}
         </AuthContext.Provider>

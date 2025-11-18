@@ -6,6 +6,7 @@ import fst.cvinsight.backend.entity.UserSocialLinks;
 import fst.cvinsight.backend.repo.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -23,7 +24,6 @@ public class ProfileService {
      */
     public Optional<UserProfile> getCurrentUserProfile() {
         var currentUser = userInfoService.getCurrentUser();
-        System.out.println("Current user: " + currentUser);
         return userProfileRepository.findByUser(currentUser);
     }
 
@@ -37,6 +37,7 @@ public class ProfileService {
     /**
      * Create or update current user's profile
      */
+    @Transactional
     public UserProfile saveOrUpdateProfile(UserProfile profileData) {
         var currentUser = userInfoService.getCurrentUser();
 
@@ -72,6 +73,8 @@ public class ProfileService {
             updateIfNotNull(profile.getSocialLinks()::setInstagram, socialLinksData.getInstagram());
         }
 
+        updateIfNotNull(currentUser::setUsername,profile.getFirstName() +' '+profile.getLastName() );
+        userInfoService.save(currentUser);
         return userProfileRepository.save(profile);
     }
 
