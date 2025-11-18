@@ -1,14 +1,18 @@
 import React, {createContext, useContext, useEffect, useState} from "react";
 import axios from "axios";
 import {useNavigate} from "react-router";
+import { UserProfile, profileService } from "../services/profileService";
 
 const baseURL = import.meta.env.VITE_BACKEND_URL;
 
 type AuthContextType = {
     user?: User;
     isAuthenticated: boolean;
+    userProfile?: UserProfile | null;
     setUser: React.Dispatch<React.SetStateAction<User | undefined>>;
     setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+    setUserProfile: React.Dispatch<React.SetStateAction<UserProfile | null | undefined>>;
+    refreshProfile: () => Promise<void>;
 }
 
 export interface User{
@@ -23,7 +27,15 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
     const [user, setUser] = useState<User | undefined>(undefined);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [userProfile, setUserProfile] = useState<UserProfile | null>();
     const navigate = useNavigate();
+
+    const refreshProfile = async () => {
+        if (isAuthenticated) {
+            const profile = await profileService.getCurrentUserProfile();
+            setUserProfile(profile);
+        }
+    };
 
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
@@ -31,8 +43,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
             const parsedUser = JSON.parse(storedUser);
             setUser(parsedUser);
             setIsAuthenticated(true);
+            // Load profile after setting user
+            refreshProfile();
             return;
         }
+
         const token = localStorage.getItem("jwt");
         if (token) {
             axios.get(`${baseURL}/auth/me`, {
@@ -44,7 +59,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
                 setUser(fetchedUser);
                 setIsAuthenticated(true);
                 localStorage.setItem("user", JSON.stringify(fetchedUser));
-                return;
+                // Load profile after user is set
+                refreshProfile();
             }).catch((error) => {
                 console.error("Error fetching user data:", error);
                 localStorage.removeItem("jwt");
@@ -54,10 +70,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
                 navigate("/signin");
             })
         }
-    }, [navigate]);
+    }, [navigate, isAuthenticated]);
 
     return (
-        <AuthContext.Provider value={{user, isAuthenticated, setUser, setIsAuthenticated}}>
+        <AuthContext.Provider value={{
+            user,
+            isAuthenticated,
+            userProfile,
+            setUser,
+            setIsAuthenticated,
+            setUserProfile,
+            refreshProfile
+        }}>
             {children}
         </AuthContext.Provider>
     );
