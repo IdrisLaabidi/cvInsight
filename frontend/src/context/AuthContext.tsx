@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
         setUser(user);
         setIsAuthenticated(true);
         refreshProfile();
-        navigate("/home");
+        navigate(`/login/success?token=${jwt}`);
     }
 
     useEffect(() => {

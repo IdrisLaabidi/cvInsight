@@ -20,8 +20,11 @@ export default function UserDropdown() {
     return (
         <div className="relative">
             <button
-                onClick={toggleDropdown}
-                className="flex items-center text-gray-700 dark:text-gray-400 focus:outline-none"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    toggleDropdown();
+                }}
+                className="dropdown-toggle flex items-center text-gray-700 dark:text-gray-400 focus:outline-none"
             >
                 {/* Avatar */}
                 <div className="mr-3 flex h-11 w-11 items-center justify-center rounded-full bg-blue-600 text-white font-semibold text-lg">
@@ -29,7 +32,7 @@ export default function UserDropdown() {
                 </div>
 
                 {/* Username */}
-                <span className="mr-1 font-medium text-theme-sm">{auth.user?.username || "User"}</span>
+                <span className="mr-1 font-medium text-theme-sm">{auth.userProfile?.firstName +" "+auth.userProfile?.lastName || "User"}</span>
 
                 {/* Dropdown Arrow */}
                 <svg
@@ -55,7 +58,7 @@ export default function UserDropdown() {
                 {/* User Info */}
                 <div className="mb-4">
           <span className="block font-medium text-gray-700 dark:text-gray-400">
-            {auth.user?.username || "John Doe"}
+            {auth.userProfile?.firstName +" "+auth.userProfile?.lastName || "John Doe"}
           </span>
                     <span className="mt-0.5 block text-sm text-gray-500 dark:text-gray-400">
             {auth.user?.email || "johndoe@example.com"}
@@ -79,7 +82,7 @@ export default function UserDropdown() {
                         <DropdownItem
                             onItemClick={closeDropdown}
                             tag="a"
-                            to="/account"
+                            to="/account-settings"
                             className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-sm hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5"
                         >
                             {/* Account Icon */}
