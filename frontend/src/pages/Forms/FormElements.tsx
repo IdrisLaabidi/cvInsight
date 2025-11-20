@@ -32,7 +32,13 @@ export default function FormElements() {
           <CheckboxComponents />
           <RadioButtons />
           <ToggleSwitch />
-          <DropzoneComponent />
+          <DropzoneComponent
+              acceptedFileTypes={{
+                  "image/png": [],
+                  "image/jpeg": [],
+                  "application/pdf": [],
+              }}
+          />
         </div>
       </div>
     </div>
