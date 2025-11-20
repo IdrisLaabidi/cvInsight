@@ -3,7 +3,7 @@ package fst.cvinsight.backend.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fst.cvinsight.backend.entity.UploadedCV;
+import fst.cvinsight.backend.entity.Resume;
 import fst.cvinsight.backend.exception.CVAnalysisException;
 import fst.cvinsight.backend.exception.CVExtractionException;
 import fst.cvinsight.backend.exception.CVStorageException;
@@ -67,7 +67,7 @@ public class CVService {
 
     public void saveCV(File cv, String jsonContent) throws CVStorageException {
         try {
-            UploadedCV uploadedCV = new UploadedCV();
+            Resume uploadedCV = new Resume();
 
             JsonNode parsed = objectMapper.readTree(jsonContent);
 
@@ -163,9 +163,9 @@ public class CVService {
         return promptTemplate.render(Map.of("cvContent", cvContent));
     }
 
-    public UploadedCV getCVById(UUID id) {
+    public Resume getCVById(UUID id) {
         UUID userId = userInfoService.getCurrentUser().getId();
-        UploadedCV cv = uploadedCVRepository.findById(id)
+        Resume cv = uploadedCVRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("CV not found"));
         if (!cv.getUploadedBy().getId().equals(userId)) {
             throw new AccessDeniedException("You are not allowed to access this CV");
@@ -174,11 +174,11 @@ public class CVService {
     }
 
     public void deleteCV(UUID id) {
-        UploadedCV existing = getCVById(id);
+        Resume existing = getCVById(id);
         uploadedCVRepository.delete(existing);
     }
 
-    public List<UploadedCV> getAllCVsForCurrentUser() {
+    public List<Resume> getAllCVsForCurrentUser() {
         UUID userId = userInfoService.getCurrentUser().getId();
         return uploadedCVRepository.findAllByUserId(userId);
     }

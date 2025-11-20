@@ -1,6 +1,6 @@
 package fst.cvinsight.backend.controller;
 
-import fst.cvinsight.backend.entity.UploadedCV;
+import fst.cvinsight.backend.entity.Resume;
 import fst.cvinsight.backend.exception.CVProcessingException;
 import fst.cvinsight.backend.service.CVService;
 import fst.cvinsight.backend.util.DocumentUtils;
@@ -92,12 +92,12 @@ public class CvController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UploadedCV>> getAllCVsForUser() {
+    public ResponseEntity<List<Resume>> getAllCVsForUser() {
         return ResponseEntity.ok(cvService.getAllCVsForCurrentUser());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UploadedCV> getCVById(@PathVariable UUID id) {
+    public ResponseEntity<Resume> getCVById(@PathVariable UUID id) {
         return ResponseEntity.ok(cvService.getCVById(id));
     }
 
