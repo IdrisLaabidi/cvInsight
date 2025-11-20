@@ -1,10 +1,12 @@
 package fst.cvinsight.backend.controller;
 
-import fst.cvinsight.backend.entity.UploadedCV;
-import fst.cvinsight.backend.exception.CVProcessingException;
-import fst.cvinsight.backend.service.CVService;
+import com.fasterxml.jackson.databind.JsonNode;
+import fst.cvinsight.backend.entity.Resume;
+import fst.cvinsight.backend.exception.ResumeProcessingException;
+import fst.cvinsight.backend.model.ResumeOrigin;
+import fst.cvinsight.backend.service.ResumeService;
 import fst.cvinsight.backend.util.DocumentUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,17 +19,12 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/cv")
-public class CvController {
+@AllArgsConstructor
+@RequestMapping("/resume")
+public class ResumeController {
 
     private final DocumentUtils documentUtils;
-    private final CVService cvService;
-
-    @Autowired
-    public CvController(DocumentUtils documentUtils, CVService cvService) {
-        this.documentUtils = documentUtils;
-        this.cvService = cvService;
-    }
+    private final ResumeService resumeService;
 
     @PostMapping(value = "/extract", consumes = {"multipart/form-data"})
     public ResponseEntity<?> extractText(@RequestPart("file") MultipartFile file) {
@@ -59,8 +56,8 @@ public class CvController {
         }
     }
 
-    @PostMapping(value = "/analyze", consumes = {"multipart/form-data"})
-    public ResponseEntity<?> analyzeCv(@RequestPart("file") MultipartFile file) {
+    @PostMapping(value = "/upload-and-process", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> uploadResume(@RequestPart("file") MultipartFile file) {
         try {
             String originalFilename = file.getOriginalFilename();
             String extension = "";
@@ -72,11 +69,11 @@ public class CvController {
             File tempFile = File.createTempFile("uploaded-" + file.getName() + "-", extension);
             file.transferTo(tempFile);
 
-            String jsonResponse = cvService.extractAndParseCV(tempFile);
+            String jsonResponse = resumeService.extractAndParseResume(tempFile);
             tempFile.delete();
 
             return ResponseEntity.ok(jsonResponse);
-        } catch (CVProcessingException e) {
+        } catch (ResumeProcessingException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", e.getMessage()));
         } catch (IOException e) {
@@ -85,20 +82,35 @@ public class CvController {
         }
     }
 
+    @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> uploadResume(@RequestPart("file") MultipartFile file, @RequestParam("origin") ResumeOrigin origin) {
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCV(@PathVariable UUID id) {
-        cvService.deleteCV(id);
+    public ResponseEntity<Void> deleteResume(@PathVariable UUID id) {
+        resumeService.deleteResume(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
-    public ResponseEntity<List<UploadedCV>> getAllCVsForUser() {
-        return ResponseEntity.ok(cvService.getAllCVsForCurrentUser());
+    public ResponseEntity<List<Resume>> getAllResumesForUser() {
+        return ResponseEntity.ok(resumeService.getAllCVsForCurrentUser());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UploadedCV> getCVById(@PathVariable UUID id) {
-        return ResponseEntity.ok(cvService.getCVById(id));
+    public ResponseEntity<Resume> getResumeById(@PathVariable UUID id) {
+        return ResponseEntity.ok(resumeService.getResumeById(id));
+    }
+
+    @GetMapping("/{id}/analysis")
+    public ResponseEntity<JsonNode> analyze(@PathVariable UUID id) {
+        return ResponseEntity.ok(resumeService.analyzeResume(id));
+    }
+
+    @GetMapping("/career/recommendations")
+    public ResponseEntity<JsonNode> recommendations() {
+        return ResponseEntity.ok(resumeService.careerRecommendations());
     }
 
     private record ErrorResponse(String message) {}
