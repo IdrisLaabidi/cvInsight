@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.template.st.StTemplateRenderer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -31,21 +30,21 @@ public class ResumeService {
 
     private final ChatClient chatClient;
     private final DocumentUtils documentUtils;
-    private final ResumeRepository uploadedCVRepository;
+    private final ResumeRepository resumeRepository;
     private final UserInfoService userInfoService;
     private final ObjectMapper objectMapper;
 
-    public String extractAndParseCV(File cv) throws IOException {
-        String cvContent;
+    public String extractAndParseResume(File file) throws IOException {
+        String resumeContent;
         try{
-            cvContent = documentUtils.extractText(cv);
+            resumeContent = documentUtils.extractText(file);
         } catch (IOException e) {
             throw new ResumeExtractionException(e);
         }
 
         String result;
         try {
-            String prompt = buildAnalysisPrompt(cvContent);
+            String prompt = buildAnalysisPrompt(resumeContent);
             result =  chatClient.prompt(prompt)
                     .call()
                     .content();
@@ -53,24 +52,24 @@ public class ResumeService {
             throw new ResumeAnalysisException(e);
         }
 
-        saveCV(cv, result);
+        saveResume(file, result);
 
         return result;
     }
 
-    public void saveCV(File cv, String jsonContent) throws ResumeStorageException {
+    public void saveResume(File file, String jsonContent) throws ResumeStorageException {
         try {
-            Resume uploadedCV = new Resume();
+            Resume resume = new Resume();
 
             JsonNode parsed = objectMapper.readTree(jsonContent);
 
-            uploadedCV.setFilename(cv.getName());
-            uploadedCV.setContentType(Files.probeContentType(cv.toPath()));
-            uploadedCV.setSize(cv.length());
-            uploadedCV.setUploadedBy(userInfoService.getCurrentUser());
-            uploadedCV.setFileData(Files.readAllBytes(cv.toPath()));
-            uploadedCV.setJsonContent(parsed);
-            uploadedCVRepository.save(uploadedCV);
+            resume.setFilename(file.getName());
+            resume.setContentType(Files.probeContentType(file.toPath()));
+            resume.setSize(file.length());
+            resume.setUploadedBy(userInfoService.getCurrentUser());
+            resume.setFileData(Files.readAllBytes(file.toPath()));
+            resume.setJsonContent(parsed);
+            resumeRepository.save(resume);
         }catch (JsonProcessingException e){
             throw new ResumeAnalysisException(e);
         } catch (IOException e) {
@@ -78,7 +77,7 @@ public class ResumeService {
         }
     }
 
-    private String buildAnalysisPrompt(String cvContent) {
+    private String buildAnalysisPrompt(String resumeContent) {
         PromptTemplate promptTemplate = PromptTemplate.builder()
                 .renderer(StTemplateRenderer.builder().startDelimiterToken('<').endDelimiterToken('>').build())
                 .template("""
@@ -153,12 +152,12 @@ public class ResumeService {
                     """)
                 .build();
 
-        return promptTemplate.render(Map.of("cvContent", cvContent));
+        return promptTemplate.render(Map.of("cvContent", resumeContent));
     }
 
-    public Resume getCVById(UUID id) {
+    public Resume getResumeById(UUID id) {
         UUID userId = userInfoService.getCurrentUser().getId();
-        Resume cv = uploadedCVRepository.findById(id)
+        Resume cv = resumeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("CV not found"));
         if (!cv.getUploadedBy().getId().equals(userId)) {
             throw new AccessDeniedException("You are not allowed to access this CV");
@@ -166,14 +165,14 @@ public class ResumeService {
         return cv;
     }
 
-    public void deleteCV(UUID id) {
-        Resume existing = getCVById(id);
-        uploadedCVRepository.delete(existing);
+    public void deleteResume(UUID id) {
+        Resume existing = getResumeById(id);
+        resumeRepository.delete(existing);
     }
 
     public List<Resume> getAllCVsForCurrentUser() {
         UUID userId = userInfoService.getCurrentUser().getId();
-        return uploadedCVRepository.findAllByUserId(userId);
+        return resumeRepository.findAllByUserId(userId);
     }
 
 }

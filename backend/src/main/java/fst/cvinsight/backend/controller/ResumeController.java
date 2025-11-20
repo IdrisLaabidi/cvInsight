@@ -5,7 +5,6 @@ import fst.cvinsight.backend.exception.ResumeProcessingException;
 import fst.cvinsight.backend.service.ResumeService;
 import fst.cvinsight.backend.util.DocumentUtils;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -68,7 +67,7 @@ public class ResumeController {
             File tempFile = File.createTempFile("uploaded-" + file.getName() + "-", extension);
             file.transferTo(tempFile);
 
-            String jsonResponse = cvService.extractAndParseCV(tempFile);
+            String jsonResponse = cvService.extractAndParseResume(tempFile);
             tempFile.delete();
 
             return ResponseEntity.ok(jsonResponse);
@@ -83,7 +82,7 @@ public class ResumeController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCV(@PathVariable UUID id) {
-        cvService.deleteCV(id);
+        cvService.deleteResume(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -94,7 +93,7 @@ public class ResumeController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Resume> getCVById(@PathVariable UUID id) {
-        return ResponseEntity.ok(cvService.getCVById(id));
+        return ResponseEntity.ok(cvService.getResumeById(id));
     }
 
     private record ErrorResponse(String message) {}
