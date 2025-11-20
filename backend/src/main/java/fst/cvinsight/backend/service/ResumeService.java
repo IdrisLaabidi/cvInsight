@@ -166,7 +166,7 @@ public class ResumeService {
         return promptTemplate.render(Map.of("cvContent", resumeContent));
     }
 
-    public ResumeDto getResumeById(UUID id) {
+    public ResumeDto getResumeDtoById(UUID id) {
         UUID userId = userInfoService.getCurrentUser().getId();
         Resume cv = resumeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("CV not found"));
@@ -174,6 +174,16 @@ public class ResumeService {
             throw new AccessDeniedException("You are not allowed to access this CV");
         }
         return resumeMapper.toDto(cv);
+    }
+
+    public Resume getResumeById(UUID id) {
+        UUID userId = userInfoService.getCurrentUser().getId();
+        Resume cv = resumeRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("CV not found"));
+        if (!cv.getUploadedBy().getId().equals(userId)) {
+            throw new AccessDeniedException("You are not allowed to access this CV");
+        }
+        return cv;
     }
 
     public void deleteResume(UUID id) {
@@ -192,7 +202,7 @@ public class ResumeService {
     }
 
     public JsonNode analyzeResume(UUID resumeId) {
-        ResumeDto resume = getResumeById(resumeId);
+        ResumeDto resume = getResumeDtoById(resumeId);
 
         String resumeJson = resume.getJsonContent().toString();
 

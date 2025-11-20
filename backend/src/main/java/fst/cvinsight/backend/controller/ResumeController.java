@@ -2,11 +2,14 @@ package fst.cvinsight.backend.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import fst.cvinsight.backend.dto.ResumeDto;
+import fst.cvinsight.backend.entity.Resume;
 import fst.cvinsight.backend.exception.ResumeProcessingException;
 import fst.cvinsight.backend.service.ResumeService;
 import fst.cvinsight.backend.util.DocumentUtils;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -118,7 +121,7 @@ public class ResumeController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ResumeDto> getResumeById(@PathVariable UUID id) {
-        return ResponseEntity.ok(resumeService.getResumeById(id));
+        return ResponseEntity.ok(resumeService.getResumeDtoById(id));
     }
 
     @GetMapping("/{id}/analysis")
@@ -129,6 +132,17 @@ public class ResumeController {
     @GetMapping("/career/recommendations")
     public ResponseEntity<JsonNode> recommendations() {
         return ResponseEntity.ok(resumeService.careerRecommendations());
+    }
+
+    @GetMapping("/{id}/file")
+    public ResponseEntity<byte[]> downloadFile(@PathVariable UUID id) {
+        Resume resume = resumeService.getResumeById(id);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(resume.getContentType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + resume.getFilename() + "\"")
+                .body(resume.getFileData());
     }
 
     private record ErrorResponse(String message) {}
