@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -83,8 +84,27 @@ public class ResumeController {
     }
 
     @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
-    public ResponseEntity<?> uploadResume(@RequestPart("file") MultipartFile file, @RequestParam("origin") ResumeOrigin origin) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> uploadResume(
+            @RequestPart("file") MultipartFile file,
+            @RequestPart("jsonContent") JsonNode jsonContent) {
+        try{
+            String originalFilename = file.getOriginalFilename();
+            String extension = "";
+
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+
+            File tempFile = File.createTempFile("uploaded-" + file.getName() + "-", extension);
+            file.transferTo(tempFile);
+
+            resumeService.saveResume(tempFile,jsonContent.asText(), null);
+
+            tempFile.delete();
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @DeleteMapping("/{id}")
