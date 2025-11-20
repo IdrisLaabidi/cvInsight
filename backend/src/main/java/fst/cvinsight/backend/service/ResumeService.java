@@ -4,12 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import fst.cvinsight.backend.dto.ResumeDto;
 import fst.cvinsight.backend.entity.Resume;
 import fst.cvinsight.backend.entity.UserInfo;
 import fst.cvinsight.backend.exception.ResumeAnalysisException;
 import fst.cvinsight.backend.exception.ResumeExtractionException;
 import fst.cvinsight.backend.exception.ResumeProcessingException;
 import fst.cvinsight.backend.exception.ResumeStorageException;
+import fst.cvinsight.backend.mapper.ResumeMapper;
 import fst.cvinsight.backend.model.ResumeOrigin;
 import fst.cvinsight.backend.repo.ResumeRepository;
 import fst.cvinsight.backend.util.DocumentUtils;
@@ -37,6 +39,7 @@ public class ResumeService {
     private final ResumeRepository resumeRepository;
     private final UserInfoService userInfoService;
     private final ObjectMapper objectMapper;
+    private final ResumeMapper resumeMapper;
 
     public String extractAndParseResume(File file) throws IOException {
         String resumeContent;
@@ -163,28 +166,33 @@ public class ResumeService {
         return promptTemplate.render(Map.of("cvContent", resumeContent));
     }
 
-    public Resume getResumeById(UUID id) {
+    public ResumeDto getResumeById(UUID id) {
         UUID userId = userInfoService.getCurrentUser().getId();
         Resume cv = resumeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("CV not found"));
         if (!cv.getUploadedBy().getId().equals(userId)) {
             throw new AccessDeniedException("You are not allowed to access this CV");
         }
-        return cv;
+        return resumeMapper.toDto(cv);
     }
 
     public void deleteResume(UUID id) {
-        Resume existing = getResumeById(id);
-        resumeRepository.delete(existing);
+        UUID userId = userInfoService.getCurrentUser().getId();
+        Resume resume = resumeRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("CV not found"));
+        if (!resume.getUploadedBy().getId().equals(userId)) {
+            throw new AccessDeniedException("You are not allowed to access this CV");
+        }
+        resumeRepository.delete(resume);
     }
 
-    public List<Resume> getAllCVsForCurrentUser() {
+    public List<ResumeDto> getAllCVsForCurrentUser() {
         UserInfo user = userInfoService.getCurrentUser();
-        return resumeRepository.findAllByUploadedBy(user);
+        return resumeMapper.toDtoList(resumeRepository.findAllByUploadedBy(user));
     }
 
     public JsonNode analyzeResume(UUID resumeId) {
-        Resume resume = getResumeById(resumeId);
+        ResumeDto resume = getResumeById(resumeId);
 
         String resumeJson = resume.getJsonContent().toString();
 

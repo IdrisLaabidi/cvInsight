@@ -1,9 +1,8 @@
 package fst.cvinsight.backend.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import fst.cvinsight.backend.entity.Resume;
+import fst.cvinsight.backend.dto.ResumeDto;
 import fst.cvinsight.backend.exception.ResumeProcessingException;
-import fst.cvinsight.backend.model.ResumeOrigin;
 import fst.cvinsight.backend.service.ResumeService;
 import fst.cvinsight.backend.util.DocumentUtils;
 import lombok.AllArgsConstructor;
@@ -16,7 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -114,12 +112,12 @@ public class ResumeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Resume>> getAllResumesForUser() {
+    public ResponseEntity<List<ResumeDto>> getAllResumesForUser() {
         return ResponseEntity.ok(resumeService.getAllCVsForCurrentUser());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Resume> getResumeById(@PathVariable UUID id) {
+    public ResponseEntity<ResumeDto> getResumeById(@PathVariable UUID id) {
         return ResponseEntity.ok(resumeService.getResumeById(id));
     }
 
