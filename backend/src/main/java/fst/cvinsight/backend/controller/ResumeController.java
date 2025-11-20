@@ -1,9 +1,10 @@
 package fst.cvinsight.backend.controller;
 
 import fst.cvinsight.backend.entity.Resume;
-import fst.cvinsight.backend.exception.CVProcessingException;
-import fst.cvinsight.backend.service.CVService;
+import fst.cvinsight.backend.exception.ResumeProcessingException;
+import fst.cvinsight.backend.service.ResumeService;
 import fst.cvinsight.backend.util.DocumentUtils;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,17 +18,12 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/cv")
-public class CvController {
+@AllArgsConstructor
+@RequestMapping("/resume")
+public class ResumeController {
 
     private final DocumentUtils documentUtils;
-    private final CVService cvService;
-
-    @Autowired
-    public CvController(DocumentUtils documentUtils, CVService cvService) {
-        this.documentUtils = documentUtils;
-        this.cvService = cvService;
-    }
+    private final ResumeService cvService;
 
     @PostMapping(value = "/extract", consumes = {"multipart/form-data"})
     public ResponseEntity<?> extractText(@RequestPart("file") MultipartFile file) {
@@ -76,7 +72,7 @@ public class CvController {
             tempFile.delete();
 
             return ResponseEntity.ok(jsonResponse);
-        } catch (CVProcessingException e) {
+        } catch (ResumeProcessingException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", e.getMessage()));
         } catch (IOException e) {

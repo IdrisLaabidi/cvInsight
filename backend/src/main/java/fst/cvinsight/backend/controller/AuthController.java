@@ -10,6 +10,7 @@ import fst.cvinsight.backend.service.UserInfoService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,28 +24,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/auth")
 public class AuthController {
 
     private final UserInfoService service;
-
     private final JwtService jwtService;
-
     private final AuthenticationManager authenticationManager;
-
     private final UserInfoMapper userInfoMapper;
-
-    @Autowired
-    AuthController(
-            UserInfoService service,
-            JwtService jwtService,
-            AuthenticationManager authenticationManager,
-            UserInfoMapper userInfoMapper) {
-        this.service = service;
-        this.jwtService = jwtService;
-        this.authenticationManager = authenticationManager;
-        this.userInfoMapper = userInfoMapper;
-    }
 
     @GetMapping(value = "/welcome")
     public String welcome() {

@@ -4,12 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fst.cvinsight.backend.entity.Resume;
-import fst.cvinsight.backend.exception.CVAnalysisException;
-import fst.cvinsight.backend.exception.CVExtractionException;
-import fst.cvinsight.backend.exception.CVStorageException;
-import fst.cvinsight.backend.repo.UploadedCVRepository;
+import fst.cvinsight.backend.exception.ResumeAnalysisException;
+import fst.cvinsight.backend.exception.ResumeExtractionException;
+import fst.cvinsight.backend.exception.ResumeStorageException;
+import fst.cvinsight.backend.repo.ResumeRepository;
 import fst.cvinsight.backend.util.DocumentUtils;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.template.st.StTemplateRenderer;
@@ -25,29 +26,21 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
-public class CVService {
+@RequiredArgsConstructor
+public class ResumeService {
 
     private final ChatClient chatClient;
     private final DocumentUtils documentUtils;
-    private final UploadedCVRepository uploadedCVRepository;
+    private final ResumeRepository uploadedCVRepository;
     private final UserInfoService userInfoService;
     private final ObjectMapper objectMapper;
-
-    @Autowired
-    public CVService(ChatClient chatClient, DocumentUtils documentUtils, UploadedCVRepository uploadedCVRepository, UserInfoService userInfoService, ObjectMapper objectMapper) {
-        this.chatClient = chatClient;
-        this.documentUtils = documentUtils;
-        this.uploadedCVRepository = uploadedCVRepository;
-        this.userInfoService = userInfoService;
-        this.objectMapper = objectMapper;
-    }
 
     public String extractAndParseCV(File cv) throws IOException {
         String cvContent;
         try{
             cvContent = documentUtils.extractText(cv);
         } catch (IOException e) {
-            throw new CVExtractionException(e);
+            throw new ResumeExtractionException(e);
         }
 
         String result;
@@ -57,7 +50,7 @@ public class CVService {
                     .call()
                     .content();
         } catch (Exception e) {
-            throw new CVAnalysisException(e);
+            throw new ResumeAnalysisException(e);
         }
 
         saveCV(cv, result);
@@ -65,7 +58,7 @@ public class CVService {
         return result;
     }
 
-    public void saveCV(File cv, String jsonContent) throws CVStorageException {
+    public void saveCV(File cv, String jsonContent) throws ResumeStorageException {
         try {
             Resume uploadedCV = new Resume();
 
@@ -79,9 +72,9 @@ public class CVService {
             uploadedCV.setJsonContent(parsed);
             uploadedCVRepository.save(uploadedCV);
         }catch (JsonProcessingException e){
-            throw new CVAnalysisException(e);
+            throw new ResumeAnalysisException(e);
         } catch (IOException e) {
-            throw new CVStorageException(e);
+            throw new ResumeStorageException(e);
         }
     }
 
