@@ -3,10 +3,13 @@ package fst.cvinsight.backend.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import fst.cvinsight.backend.entity.Resume;
 import fst.cvinsight.backend.exception.ResumeAnalysisException;
 import fst.cvinsight.backend.exception.ResumeExtractionException;
+import fst.cvinsight.backend.exception.ResumeProcessingException;
 import fst.cvinsight.backend.exception.ResumeStorageException;
+import fst.cvinsight.backend.model.ResumeOrigin;
 import fst.cvinsight.backend.repo.ResumeRepository;
 import fst.cvinsight.backend.util.DocumentUtils;
 import jakarta.persistence.EntityNotFoundException;
@@ -22,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -52,12 +56,12 @@ public class ResumeService {
             throw new ResumeAnalysisException(e);
         }
 
-        saveResume(file, result);
+        saveResume(file, result, Optional.of(ResumeOrigin.USER_UPLOADED));
 
         return result;
     }
 
-    public void saveResume(File file, String jsonContent) throws ResumeStorageException {
+    public void saveResume(File file, String jsonContent, Optional<ResumeOrigin> origin) throws ResumeStorageException {
         try {
             Resume resume = new Resume();
 
@@ -69,6 +73,7 @@ public class ResumeService {
             resume.setUploadedBy(userInfoService.getCurrentUser());
             resume.setFileData(Files.readAllBytes(file.toPath()));
             resume.setJsonContent(parsed);
+            origin.ifPresent(resume::setOrigin);
             resumeRepository.save(resume);
         }catch (JsonProcessingException e){
             throw new ResumeAnalysisException(e);
@@ -175,4 +180,110 @@ public class ResumeService {
         return resumeRepository.findAllByUserId(userId);
     }
 
+    public JsonNode analyzeResume(UUID resumeId) {
+        Resume resume = getResumeById(resumeId);
+
+        String resumeJson = resume.getJsonContent().toString();
+
+        String prompt = """
+            You are an expert resume reviewer with 20+ years of experience in HR, technical hiring, and career development.
+        
+            Your task:
+            - Analyze the following resume JSON and extract weaknesses, improvements, mistakes, and missing sections.
+            - Provide clear, actionable, and practical feedback.
+            - Evaluate the overall quality and assign a numerical score from 0 to 100.
+        
+            ----------------------------
+            Guidelines (IMPORTANT):
+            ----------------------------
+            1. **Do NOT generate or invent experience, skills, or data that are not present.**
+            2. Base ALL analysis strictly on the provided resume JSON.
+            3. If a section is empty or missing, list it under `missingSections`.
+            4. Weaknesses must be directly supported by the resume contents (e.g., vague descriptions, missing dates).
+            5. Improvements must be actionable steps (e.g., "Add metrics", "Expand project descriptions").
+            6. Mistakes should include formatting issues, typos, inconsistencies, or missing date ranges if applicable.
+            7. Score evaluation rules:
+               - 0–39: Very weak resume
+               - 40–59: Needs significant improvement
+               - 60–79: Decent but missing important elements
+               - 80–89: Strong resume with minor issues
+               - 90–100: Excellent resume
+            8. **Return strictly valid JSON**.
+            9. **Do NOT include explanations outside of the JSON**.
+            10. Do NOT include the prompt, reasoning, or any extra commentary.
+            11. No markdown, no backticks — only raw JSON.
+        
+            ----------------------------
+            Resume JSON:
+            %s
+            ----------------------------
+        
+            The output MUST follow exactly this JSON schema:
+            {
+              "weaknesses": ["", ""],
+              "improvements": ["", ""],
+              "missingSections": ["", ""],
+              "mistakes": ["", ""],
+              "score": 0,
+              "overallFeedback": ""
+            }
+        
+            Output ONLY the JSON object.
+        """.formatted(resumeJson);
+
+
+        try {
+            String response = chatClient.prompt(prompt).call().content();
+            return objectMapper.readTree(response);
+        } catch (JsonProcessingException ex) {
+            throw new ResumeProcessingException(ex.getMessage(),ex);
+        } catch (Exception e) {
+            throw new ResumeAnalysisException(e);
+        }
+    }
+
+    public JsonNode careerRecommendations() {
+
+        UUID userId = userInfoService.getCurrentUser().getId();
+        List<Resume> resumes = resumeRepository.findAllByUserId(userId);
+
+        ArrayNode resumeArray = objectMapper.createArrayNode();
+        for (Resume r : resumes) {
+            resumeArray.add(r.getJsonContent());
+        }
+
+        String prompt = """
+            You are a professional career advisor.
+
+            Below are all resumes for a user (in JSON format):
+            %s
+
+            Based on ALL skills, certifications, education and experience:
+            Recommend:
+            - missing skills to learn
+            - suggested certifications
+            - suggested online courses
+            - job roles the user is suited for
+            - skill gaps
+            - a personalized career growth plan
+
+            Return strictly valid JSON with this structure:
+            {
+              "recommendedCertifications": ["", ""],
+              "recommendedCourses": ["", ""],
+              "recommendedJobRoles": ["", ""],
+              "skillsToImprove": ["", ""],
+              "careerPlan": ["step1", "step2", "step3"]
+            }
+
+            Output only JSON.
+        """.formatted(resumeArray.toPrettyString());
+
+        try {
+            String response = chatClient.prompt(prompt).call().content();
+            return objectMapper.readTree(response);
+        } catch (Exception e) {
+            throw new ResumeAnalysisException(e);
+        }
+    }
 }

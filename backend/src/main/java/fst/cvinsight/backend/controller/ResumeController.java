@@ -1,7 +1,9 @@
 package fst.cvinsight.backend.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import fst.cvinsight.backend.entity.Resume;
 import fst.cvinsight.backend.exception.ResumeProcessingException;
+import fst.cvinsight.backend.model.ResumeOrigin;
 import fst.cvinsight.backend.service.ResumeService;
 import fst.cvinsight.backend.util.DocumentUtils;
 import lombok.AllArgsConstructor;
@@ -22,7 +24,7 @@ import java.util.UUID;
 public class ResumeController {
 
     private final DocumentUtils documentUtils;
-    private final ResumeService cvService;
+    private final ResumeService resumeService;
 
     @PostMapping(value = "/extract", consumes = {"multipart/form-data"})
     public ResponseEntity<?> extractText(@RequestPart("file") MultipartFile file) {
@@ -54,8 +56,8 @@ public class ResumeController {
         }
     }
 
-    @PostMapping(value = "/analyze", consumes = {"multipart/form-data"})
-    public ResponseEntity<?> analyzeCv(@RequestPart("file") MultipartFile file) {
+    @PostMapping(value = "/upload-and-process", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> uploadResume(@RequestPart("file") MultipartFile file) {
         try {
             String originalFilename = file.getOriginalFilename();
             String extension = "";
@@ -67,7 +69,7 @@ public class ResumeController {
             File tempFile = File.createTempFile("uploaded-" + file.getName() + "-", extension);
             file.transferTo(tempFile);
 
-            String jsonResponse = cvService.extractAndParseResume(tempFile);
+            String jsonResponse = resumeService.extractAndParseResume(tempFile);
             tempFile.delete();
 
             return ResponseEntity.ok(jsonResponse);
@@ -80,20 +82,35 @@ public class ResumeController {
         }
     }
 
+    @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> uploadResume(@RequestPart("file") MultipartFile file, @RequestParam("origin") ResumeOrigin origin) {
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCV(@PathVariable UUID id) {
-        cvService.deleteResume(id);
+    public ResponseEntity<Void> deleteResume(@PathVariable UUID id) {
+        resumeService.deleteResume(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
-    public ResponseEntity<List<Resume>> getAllCVsForUser() {
-        return ResponseEntity.ok(cvService.getAllCVsForCurrentUser());
+    public ResponseEntity<List<Resume>> getAllResumesForUser() {
+        return ResponseEntity.ok(resumeService.getAllCVsForCurrentUser());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Resume> getCVById(@PathVariable UUID id) {
-        return ResponseEntity.ok(cvService.getResumeById(id));
+    public ResponseEntity<Resume> getResumeById(@PathVariable UUID id) {
+        return ResponseEntity.ok(resumeService.getResumeById(id));
+    }
+
+    @GetMapping("/{id}/analysis")
+    public ResponseEntity<JsonNode> analyze(@PathVariable UUID id) {
+        return ResponseEntity.ok(resumeService.analyzeResume(id));
+    }
+
+    @GetMapping("/career/recommendations")
+    public ResponseEntity<JsonNode> recommendations() {
+        return ResponseEntity.ok(resumeService.careerRecommendations());
     }
 
     private record ErrorResponse(String message) {}
