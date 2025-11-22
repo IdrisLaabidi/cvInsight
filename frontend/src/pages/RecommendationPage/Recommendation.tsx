@@ -1,15 +1,15 @@
 import PageMeta from "../../components/common/PageMeta.tsx";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb.tsx";
 
-export default function CvAnalysis() {
+export default function Recommendation() {
     return(
         <>
             <PageMeta
-                    title="CV Analyser | CVinsight"
+                title="Career Recommendations | CVInsight"
                 description="PLACEHOLDER DESCRIPTION FOR SEO"
             />
-            <PageBreadcrumb pageTitle="Resume Analyser" />
-            <h1>CVAnalysis page</h1>
+            <PageBreadcrumb pageTitle="Recommendations" />
+            <h1>Recommendation page</h1>
         </>
     )
 }

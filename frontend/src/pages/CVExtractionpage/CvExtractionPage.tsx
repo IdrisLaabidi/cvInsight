@@ -12,7 +12,7 @@ export default function CvExtractionPage() {
     const [error, setError] = useState<string | null>(null);
 
     const handleFileChange = (files: File[]) => {
-        setSelectedFiles(files);  // ⬅️ You now have ALL selected files here
+        setSelectedFiles(files);
         setResult(null);
         setError(null);
     };
@@ -43,7 +43,7 @@ export default function CvExtractionPage() {
     return(
         <>
             <PageMeta
-                title="CV Extraction and Reformulation | CVinsight"
+                title="CV Extraction and Reformulation | CVInsight"
                 description="PLACEHOLDER DESCRIPTION FOR SEO"
             />
             <PageBreadcrumb pageTitle="Resume Extraction" />
