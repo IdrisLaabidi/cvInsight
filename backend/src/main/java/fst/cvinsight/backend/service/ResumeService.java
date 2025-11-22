@@ -4,11 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import fst.cvinsight.backend.dto.ResumeDto;
 import fst.cvinsight.backend.entity.Resume;
+import fst.cvinsight.backend.entity.UserInfo;
 import fst.cvinsight.backend.exception.ResumeAnalysisException;
 import fst.cvinsight.backend.exception.ResumeExtractionException;
 import fst.cvinsight.backend.exception.ResumeProcessingException;
 import fst.cvinsight.backend.exception.ResumeStorageException;
+import fst.cvinsight.backend.mapper.ResumeMapper;
 import fst.cvinsight.backend.model.ResumeOrigin;
 import fst.cvinsight.backend.repo.ResumeRepository;
 import fst.cvinsight.backend.util.DocumentUtils;
@@ -25,7 +28,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -37,6 +39,7 @@ public class ResumeService {
     private final ResumeRepository resumeRepository;
     private final UserInfoService userInfoService;
     private final ObjectMapper objectMapper;
+    private final ResumeMapper resumeMapper;
 
     public String extractAndParseResume(File file) throws IOException {
         String resumeContent;
@@ -56,12 +59,12 @@ public class ResumeService {
             throw new ResumeAnalysisException(e);
         }
 
-        saveResume(file, result, Optional.of(ResumeOrigin.USER_UPLOADED));
+        saveResume(file, result, ResumeOrigin.USER_UPLOADED);
 
         return result;
     }
 
-    public void saveResume(File file, String jsonContent, Optional<ResumeOrigin> origin) throws ResumeStorageException {
+    public void saveResume(File file, String jsonContent, ResumeOrigin origin) throws ResumeStorageException {
         try {
             Resume resume = new Resume();
 
@@ -73,9 +76,12 @@ public class ResumeService {
             resume.setUploadedBy(userInfoService.getCurrentUser());
             resume.setFileData(Files.readAllBytes(file.toPath()));
             resume.setJsonContent(parsed);
-            origin.ifPresent(resume::setOrigin);
+
+            resume.setOrigin(origin != null ? origin : ResumeOrigin.SYSTEM_GENERATED);
+
             resumeRepository.save(resume);
-        }catch (JsonProcessingException e){
+
+        } catch (JsonProcessingException e) {
             throw new ResumeAnalysisException(e);
         } catch (IOException e) {
             throw new ResumeStorageException(e);
@@ -160,6 +166,16 @@ public class ResumeService {
         return promptTemplate.render(Map.of("cvContent", resumeContent));
     }
 
+    public ResumeDto getResumeDtoById(UUID id) {
+        UUID userId = userInfoService.getCurrentUser().getId();
+        Resume cv = resumeRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("CV not found"));
+        if (!cv.getUploadedBy().getId().equals(userId)) {
+            throw new AccessDeniedException("You are not allowed to access this CV");
+        }
+        return resumeMapper.toDto(cv);
+    }
+
     public Resume getResumeById(UUID id) {
         UUID userId = userInfoService.getCurrentUser().getId();
         Resume cv = resumeRepository.findById(id)
@@ -171,17 +187,22 @@ public class ResumeService {
     }
 
     public void deleteResume(UUID id) {
-        Resume existing = getResumeById(id);
-        resumeRepository.delete(existing);
+        UUID userId = userInfoService.getCurrentUser().getId();
+        Resume resume = resumeRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("CV not found"));
+        if (!resume.getUploadedBy().getId().equals(userId)) {
+            throw new AccessDeniedException("You are not allowed to access this CV");
+        }
+        resumeRepository.delete(resume);
     }
 
-    public List<Resume> getAllCVsForCurrentUser() {
-        UUID userId = userInfoService.getCurrentUser().getId();
-        return resumeRepository.findAllByUserId(userId);
+    public List<ResumeDto> getAllCVsForCurrentUser() {
+        UserInfo user = userInfoService.getCurrentUser();
+        return resumeMapper.toDtoList(resumeRepository.findAllByUploadedBy(user));
     }
 
     public JsonNode analyzeResume(UUID resumeId) {
-        Resume resume = getResumeById(resumeId);
+        ResumeDto resume = getResumeDtoById(resumeId);
 
         String resumeJson = resume.getJsonContent().toString();
 
@@ -244,8 +265,8 @@ public class ResumeService {
 
     public JsonNode careerRecommendations() {
 
-        UUID userId = userInfoService.getCurrentUser().getId();
-        List<Resume> resumes = resumeRepository.findAllByUserId(userId);
+        UserInfo user= userInfoService.getCurrentUser();
+        List<Resume> resumes = resumeRepository.findAllByUploadedBy(user);
 
         ArrayNode resumeArray = objectMapper.createArrayNode();
         for (Resume r : resumes) {
@@ -253,21 +274,31 @@ public class ResumeService {
         }
 
         String prompt = """
-            You are a professional career advisor.
-
-            Below are all resumes for a user (in JSON format):
+            You are a professional career advisor. Your task is to analyze all user resumes and produce career guidance.
+        
+            BELOW IS IMPORTANT — FOLLOW STRICTLY:
+        
+            ### INPUT
+            The following is an array of resumes in JSON format:
             %s
-
-            Based on ALL skills, certifications, education and experience:
-            Recommend:
-            - missing skills to learn
-            - suggested certifications
-            - suggested online courses
-            - job roles the user is suited for
-            - skill gaps
-            - a personalized career growth plan
-
-            Return strictly valid JSON with this structure:
+        
+            ### YOUR TASK
+            Based on ALL extracted skills, certifications, education, and work experience across *all* provided resumes:
+              - Identify missing or in-demand skills the user should learn.
+              - Recommend relevant certifications.
+              - Recommend online courses (well-known platforms only).
+              - Suggest job roles suitable for the user.
+              - Identify skill gaps.
+              - Create a clear, step-by-step personalized career growth plan.
+        
+            ### STRICT OUTPUT RULES — DO NOT BREAK THESE:
+            1. **Output ONLY valid JSON. No explanations, no extra text, no markdown.**
+            2. **The JSON MUST be syntactically valid and must follow the exact schema below.**
+            3. **Every field MUST be present; empty fields must be empty arrays.**
+            4. **Do NOT include comments or trailing commas.**
+            5. **All strings should be plain strings (no line breaks inside).**
+        
+            ### REQUIRED JSON SCHEMA (OUTPUT MUST MATCH EXACTLY):
             {
               "recommendedCertifications": ["", ""],
               "recommendedCourses": ["", ""],
@@ -275,9 +306,11 @@ public class ResumeService {
               "skillsToImprove": ["", ""],
               "careerPlan": ["step1", "step2", "step3"]
             }
-
-            Output only JSON.
+        
+            ### FINAL INSTRUCTION
+            Respond with **ONLY** the JSON object defined above. If unsure, output empty arrays.
         """.formatted(resumeArray.toPrettyString());
+
 
         try {
             String response = chatClient.prompt(prompt).call().content();
