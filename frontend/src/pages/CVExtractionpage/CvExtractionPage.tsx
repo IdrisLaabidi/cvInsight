@@ -1,6 +1,9 @@
 import DropzoneComponent from "../../components/form/form-elements/DropZone.tsx";
 import {useState} from "react";
 import axiosInstance from "../../utils/axiosInstance.ts";
+import Button from "../../components/ui/button/Button.tsx";
+import PageMeta from "../../components/common/PageMeta.tsx";
+import PageBreadcrumb from "../../components/common/PageBreadCrumb.tsx";
 
 export default function CvExtractionPage() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -14,10 +17,9 @@ export default function CvExtractionPage() {
             setResult(null);
             setError(null);
         }
-        console.log(files);
     };
 
-    const handleUpload = async () => {
+    const handleUpload = () => {
         if (!selectedFile) return;
 
         setUploading(true);
@@ -27,25 +29,26 @@ export default function CvExtractionPage() {
         const formData = new FormData();
         formData.append("file", selectedFile);
 
-        try {
-            const response = await axiosInstance.post("/resume/upload-and-process", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
-
-            setResult(JSON.stringify(response.data, null, 2));
-        } catch (err: any) {
-            if (err.response?.data?.error) {
-                setError(err.response.data.error);
-            } else {
-                setError("Unexpected error occurred during upload.");
-            }
-        } finally {
-            setUploading(false);
-        }
+        axiosInstance.post("/resume/upload-and-process", formData, {
+            timeout: 0,
+            headers: { "Content-Type": "multipart/form-data" },
+        })
+            .then(response => {
+                setResult(JSON.stringify(response.data, null, 2));
+            })
+            .catch(error => {
+                setError(error.response?.data?.error || "Unexpected error occurred during upload.");
+            })
+            .finally(() => setUploading(false))
     };
+
     return(
         <>
-            <h1>Upload a resume (PDF or DOCX only)</h1>
+            <PageMeta
+                title="CV Extraction and Reformulation | CVinsight"
+                description="PLACEHOLDER DESCRIPTION FOR SEO"
+            />
+            <PageBreadcrumb pageTitle="Resume Extraction" />
 
             <DropzoneComponent
                 acceptedFileTypes={{
@@ -58,13 +61,13 @@ export default function CvExtractionPage() {
             {selectedFile && (
                 <div className="upload-actions">
                     <p>Selected file: {selectedFile.name}</p>
-                    <button
+                    <Button
                         onClick={handleUpload}
                         disabled={uploading}
                         className="upload-btn"
                     >
                         {uploading ? "Uploading..." : "Upload and Process"}
-                    </button>
+                    </Button>
                 </div>
             )}
 
