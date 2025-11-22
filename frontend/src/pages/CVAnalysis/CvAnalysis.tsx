@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import CvListPanel from "./CvListPanel";
 import CvAnalysisResult from "./CvAnalysisResult";
 
+import PageMeta from "../../components/common/PageMeta.tsx";
+import PageBreadcrumb from "../../components/common/PageBreadCrumb.tsx";
+
 export default function CvAnalysis() {
     const [resumes, setResumes] = useState([]);
     const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -39,6 +42,12 @@ export default function CvAnalysis() {
     };
 
     return (
+        <>
+            <PageMeta
+                title="CV Analyser | CVinsight"
+                description="PLACEHOLDER DESCRIPTION FOR SEO"
+            />
+            <PageBreadcrumb pageTitle="Resume Analyser" />
         <div style={{ display: "flex", height: "100%", gap: "16px" }}>
             {/* Left Panel */}
             <CvListPanel
@@ -50,5 +59,6 @@ export default function CvAnalysis() {
             {/* Right Panel */}
             <CvAnalysisResult analysis={analysis} loading={loading} />
         </div>
+        </>
     );
 }
