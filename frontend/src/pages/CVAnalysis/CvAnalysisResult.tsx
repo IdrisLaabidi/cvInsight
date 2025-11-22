@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 
 const styles = {
     container: {
-        width: "70%",
         padding: "32px",
         color: "#333",
     },
