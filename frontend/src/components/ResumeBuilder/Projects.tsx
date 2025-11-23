@@ -1,117 +1,125 @@
 import React from "react";
 import { useResume } from "./ResumeContext";
-import { MdDelete } from "react-icons/md";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
+
+const DeleteIcon: React.FC<{ size?: number }> = ({ size = 20 }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current" fill="none" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" width={size} height={size} aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+);
 
 const Projects: React.FC = () => {
-  const { projects, setProjects } = useResume();
+    const { projects, setProjects } = useResume();
 
-  const addMore = () => {
-    setProjects([
-      ...projects,
-      {
-        id: uuidv4(),
-        name: "",
-        url: "",
-        github: "",
-        description: "",
-      },
-    ]);
-  };
+    const addMore = () => {
+        setProjects([
+            ...projects,
+            {
+                id: uuidv4(),
+                name: "",
+                url: "",
+                github: "",
+                description: "",
+            },
+        ]);
+    };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, id: string) => {
-    const { name, value } = e.target;
-    const updated = projects.map((project) =>
-      project.id === id ? { ...project, [name]: value } : project
-    );
-    setProjects(updated);
-  };
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, id: string) => {
+        const { name, value } = e.target;
+        setProjects(projects.map((project) => (project.id === id ? { ...project, [name]: value } : project)));
+    };
 
-  const deleteProject = (id: string) => {
-    setProjects(projects.filter((p) => p.id !== id));
-  };
+    const deleteProject = (id: string) => {
+        setProjects(projects.filter((p) => p.id !== id));
+    };
 
-  return (
-    <div className="space-y-4">
-      {projects.map((project) => (
-        <div key={project.id} className="border-2 border-gray-200 rounded-lg overflow-hidden hover:border-blue-300 transition-colors">
-          <div className="flex justify-between items-center px-4 py-3 bg-gray-50 border-b-2 border-gray-200">
-            <h3 className="font-semibold text-blue-600">{project.name || "Project Name"}</h3>
-            <button
-              onClick={() => deleteProject(project.id)}
-              className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-              title="Delete"
-            >
-              <MdDelete size={20} className="text-red-500 hover:text-red-700" />
-            </button>
-          </div>
-          <div className="p-4 space-y-4">
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-gray-700">Project Name</label>
-              <input
-                type="text"
-                id={`name-${project.id}`}
-                name="name"
-                value={project.name}
-                onChange={(e) => handleChange(e, project.id)}
-                placeholder="Project Name"
-                className="px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
-              />
-            </div>
+    return (
+        <div className="space-y-8 max-w-3xl mx-auto">
+            {projects.map((project) => (
+                <div key={project.id} className="group border border-gray-300 rounded-xl shadow-sm hover:shadow-md transition-shadow bg-white dark:bg-gray-900 dark:border-gray-700">
+                    <header className="flex justify-between items-center bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 rounded-t-xl">
+                        <h3 className="font-semibold text-blue-600 text-lg">{project.name || "Project Name"}</h3>
+                        <button
+                            onClick={() => deleteProject(project.id)}
+                            className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                            title="Delete"
+                            type="button"
+                            aria-label={`Delete project: ${project.name || "Untitled"}`}
+                        >
+                            <DeleteIcon />
+                        </button>
+                    </header>
+                    <section className="p-6 space-y-6">
+                        <div className="flex flex-col gap-6">
+                            <div>
+                                <label htmlFor={`name-${project.id}`} className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Project Name</label>
+                                <input
+                                    id={`name-${project.id}`}
+                                    name="name"
+                                    placeholder="Project Name"
+                                    value={project.name}
+                                    onChange={(e) => handleChange(e, project.id)}
+                                    className="mt-1 block w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                                />
+                            </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-gray-700">Project URL</label>
-                <input
-                  type="url"
-                  id={`url-${project.id}`}
-                  name="url"
-                  value={project.url}
-                  onChange={(e) => handleChange(e, project.id)}
-                  placeholder="https://example.com"
-                  className="px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all text-sm"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-gray-700">GitHub Repository</label>
-                <input
-                  type="url"
-                  id={`github-${project.id}`}
-                  name="github"
-                  value={project.github}
-                  onChange={(e) => handleChange(e, project.id)}
-                  placeholder="https://github.com/username/repo"
-                  className="px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all text-sm"
-                />
-              </div>
-            </div>
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label htmlFor={`url-${project.id}`} className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Project URL</label>
+                                    <input
+                                        id={`url-${project.id}`}
+                                        name="url"
+                                        type="url"
+                                        placeholder="https://example.com"
+                                        value={project.url}
+                                        onChange={(e) => handleChange(e, project.id)}
+                                        className="mt-1 block w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                                    />
+                                </div>
 
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-gray-700">Description</label>
-              <textarea
-                id={`description-${project.id}`}
-                name="description"
-                value={project.description}
-                onChange={(e) => handleChange(e, project.id)}
-                placeholder="Describe your project..."
-                rows={4}
-                className="px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all resize-none text-sm"
-              />
-            </div>
-          </div>
+                                <div>
+                                    <label htmlFor={`github-${project.id}`} className="block text-sm font-semibold text-gray-700 dark:text-gray-300">GitHub Repository</label>
+                                    <input
+                                        id={`github-${project.id}`}
+                                        name="github"
+                                        type="url"
+                                        placeholder="https://github.com/username/repo"
+                                        value={project.github}
+                                        onChange={(e) => handleChange(e, project.id)}
+                                        className="mt-1 block w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label htmlFor={`description-${project.id}`} className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Description</label>
+                                <textarea
+                                    id={`description-${project.id}`}
+                                    name="description"
+                                    rows={4}
+                                    placeholder="Describe your project..."
+                                    value={project.description}
+                                    onChange={(e) => handleChange(e, project.id)}
+                                    className="mt-1 block w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-3 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                                />
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            ))}
+
+            {projects.length < 5 && (
+                <button
+                    onClick={addMore}
+                    type="button"
+                    className="block w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl shadow hover:shadow-lg hover:from-blue-700 hover:to-blue-800 transition"
+                >
+                    + Add Project
+                </button>
+            )}
         </div>
-      ))}
-
-      {projects.length < 5 && (
-        <button
-          onClick={addMore}
-          className="w-full py-2 px-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg hover:shadow-lg hover:from-blue-600 hover:to-blue-700 transition-all"
-        >
-          + Add Project
-        </button>
-      )}
-    </div>
-  );
+    );
 };
 
 export default Projects;

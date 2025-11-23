@@ -2,137 +2,56 @@ import React from "react";
 import { useResume } from "./ResumeContext";
 
 const About: React.FC = () => {
-  const { about, setAbout } = useResume();
+    const { about, setAbout } = useResume();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setAbout({ ...about, [name]: value });
-  };
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setAbout({ ...about, [name]: value });
+    };
 
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-gray-700">Full Name</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={about.name || ""}
-            onChange={handleChange}
-            placeholder="Full Name"
-            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-gray-700">Role</label>
-          <input
-            type="text"
-            id="role"
-            name="role"
-            value={about.role || ""}
-            onChange={handleChange}
-            placeholder="Role"
-            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
-          />
-        </div>
-      </div>
+    return (
+        <div className="space-y-8 max-w-3xl mx-auto">
+            <div className="grid grid-cols-2 gap-6">
+                {[
+                    { id: "name", label: "Full Name", type: "text", autoComplete: "name", placeholder: "Full Name", value: about.name },
+                    { id: "role", label: "Role", type: "text", placeholder: "Role", value: about.role },
+                    { id: "email", label: "Email", type: "email", autoComplete: "email", placeholder: "Email", value: about.email },
+                    { id: "phone", label: "Phone", type: "tel", autoComplete: "tel", placeholder: "Phone", value: about.phone },
+                    { id: "address", label: "Address", type: "text", autoComplete: "street-address", placeholder: "Address", value: about.address },
+                    { id: "linkedin", label: "LinkedIn", type: "url", placeholder: "https://linkedin.com", value: about.linkedin },
+                    { id: "github", label: "GitHub", type: "url", placeholder: "https://github.com", value: about.github },
+                    { id: "portfolio", label: "Portfolio", type: "url", placeholder: "https://yourportfolio.com", value: about.portfolio },
+                ].map(({ id, label, type, autoComplete, placeholder, value }) => (
+                    <div key={id} className="flex flex-col gap-2">
+                        <label htmlFor={id} className="text-sm font-semibold text-gray-700 dark:text-gray-300">{label}</label>
+                        <input
+                            id={id}
+                            name={id}
+                            type={type}
+                            autoComplete={autoComplete}
+                            placeholder={placeholder}
+                            value={value || ""}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                        />
+                    </div>
+                ))}
+            </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-gray-700">Email</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={about.email || ""}
-            onChange={handleChange}
-            placeholder="Email"
-            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
-          />
+            <div className="flex flex-col gap-4 max-w-3xl mx-auto">
+                <label htmlFor="summary" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Professional Summary</label>
+                <textarea
+                    id="summary"
+                    name="summary"
+                    rows={5}
+                    placeholder="Write a brief professional summary"
+                    value={about.summary || ""}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                />
+            </div>
         </div>
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-gray-700">Phone</label>
-          <input
-            type="tel"
-            id="phone"
-            name="phone"
-            value={about.phone || ""}
-            onChange={handleChange}
-            placeholder="Phone"
-            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-gray-700">Address</label>
-          <input
-            type="text"
-            id="address"
-            name="address"
-            value={about.address || ""}
-            onChange={handleChange}
-            placeholder="Address"
-            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-gray-700">LinkedIn</label>
-          <input
-            type="url"
-            id="linkedin"
-            name="linkedin"
-            value={about.linkedin || ""}
-            onChange={handleChange}
-            placeholder="https://linkedin.com"
-            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-gray-700">GitHub</label>
-          <input
-            type="url"
-            id="github"
-            name="github"
-            value={about.github || ""}
-            onChange={handleChange}
-            placeholder="https://github.com"
-            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-gray-700">Portfolio</label>
-          <input
-            type="url"
-            id="portfolio"
-            name="portfolio"
-            value={about.portfolio || ""}
-            onChange={handleChange}
-            placeholder="https://yourportfolio.com"
-            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-semibold text-gray-700">Professional Summary</label>
-        <textarea
-          id="summary"
-          name="summary"
-          value={about.summary || ""}
-          onChange={handleChange}
-          placeholder="Write a brief professional summary"
-          rows={5}
-          className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all resize-none"
-        />
-      </div>
-    </div>
-  );
+    );
 };
 
 export default About;
