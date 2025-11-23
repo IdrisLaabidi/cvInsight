@@ -1,5 +1,3 @@
-// Types pour les recommandations de carrière
-
 export type RecommendationType = 'course' | 'certification' | 'training' | 'opportunity';
 export type RecommendationLevel = 'beginner' | 'intermediate' | 'advanced';
 export type RecommendationProvider = 'coursera' | 'udemy' | 'linkedin' | 'aws' | 'google' | 'microsoft' | 'other';
