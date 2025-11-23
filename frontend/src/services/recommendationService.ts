@@ -1,5 +1,5 @@
 import axiosInstance from "../utils/axiosInstance.ts";
-import { Recommendation } from '../types/recommendation.types';
+import {Recommendation, RecommendationFilters} from '../types/recommendation.types';
 
 export interface ResumeDto {
     id: string;
@@ -64,9 +64,12 @@ export const recommendationService = {
      * Get career recommendations
      * GET /resume/career/recommendations
      */
-    getRecommendations(){
+    getRecommendations(cvIds: string[], recommendationFilters:RecommendationFilters){
         return axiosInstance
-            .get<Recommendation[]>('/resume/career/recommendations')
+            .post<Recommendation[]>('/resume/career/recommendations', {
+                cvIds,
+                recommendationFilters
+            })
             .then((res) => res.data)
             .catch((error) => {
                 throw new Error(error?.response?.data?.message || 'Failed to fetch recommendations.');
