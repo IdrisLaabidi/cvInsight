@@ -22,7 +22,6 @@ export default function CVSelector({
         return selectedCVs !== null && !Array.isArray(selectedCVs) && selectedCVs.id === cvId;
     };
 
-    // Helper function to get selected CVs as array
     const getSelectedCVsArray = (): CVSummary[] => {
         if (multiSelect && Array.isArray(selectedCVs)) {
             return selectedCVs;
@@ -33,21 +32,17 @@ export default function CVSelector({
         return [];
     };
 
-    // Handle CV selection
     const handleSelectCV = (cv: CVSummary) => {
         if (multiSelect) {
             const currentSelected = Array.isArray(selectedCVs) ? selectedCVs : [];
             const isCurrentlySelected = currentSelected.some(selected => selected.id === cv.id);
 
             if (isCurrentlySelected) {
-                // Remove from selection
                 onSelectCV(currentSelected.filter(selected => selected.id !== cv.id));
             } else {
-                // Add to selection
                 onSelectCV([...currentSelected, cv]);
             }
         } else {
-            // Single select mode
             onSelectCV(cv);
         }
     };
@@ -107,7 +102,7 @@ export default function CVSelector({
             </div>
 
             {/* CV List */}
-            <div className="space-y-2">
+            <div className="space-y-2 ">
                 {cvList.map((cv) => {
                     const selected = isSelected(cv.id);
 
