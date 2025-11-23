@@ -25,41 +25,34 @@ export default function CareerRecommendations() {
     const [isLoadingRecs, setIsLoadingRecs] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Charger la liste des CVs
     useEffect(() => {
-        const fetchCVs = async () => {
-            setIsLoadingCVs(true);
-            try {
-                const cvs = await recommendationService.getUserCVs();
+        setIsLoadingCVs(true);
+
+        recommendationService.getUserCVs()
+            .then(cvs => {
                 setCvList(cvs);
                 if (cvs.length > 0) setSelectedCV(cvs[0]);
-            } catch (err) {
+            })
+            .catch(err => {
                 console.error('Error fetching CVs:', err);
                 setError('Failed to load your CVs');
-            } finally {
-                setIsLoadingCVs(false);
-            }
-        };
-        fetchCVs();
+            })
+            .finally(() => setIsLoadingCVs(false));
     }, []);
 
-    // Charger les recommandations quand un CV est sélectionné
     useEffect(() => {
         if (!selectedCV) return;
-        const fetchRecommendations = async () => {
-            setIsLoadingRecs(true);
-            setError(null);
-            try {
-                const recs = await recommendationService.getRecommendations(/*selectedCV.id, filters*/);
-                setRecommendations(recs);
-            } catch (err) {
+
+        setIsLoadingRecs(true);
+        setError(null);
+
+        recommendationService.getRecommendations(/*selectedCV.id, filters*/)
+            .then(recs => setRecommendations(recs))
+            .catch(err => {
                 console.error('Error fetching recommendations:', err);
                 setError('Failed to load recommendations');
-            } finally {
-                setIsLoadingRecs(false);
-            }
-        };
-        fetchRecommendations();
+            })
+            .finally(() => setIsLoadingRecs(false));
     }, [selectedCV, filters]);
 
     const handleSaveRecommendation = async (id: string) => {
@@ -84,9 +77,9 @@ export default function CareerRecommendations() {
     // Filtrer les recommandations
     const filteredRecommendations = recommendations.filter(rec => {
         if (activeTab !== 'all' && rec.type !== activeTab) return false;
-        if (searchQuery && !rec.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-            !rec.description.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-        return true;
+        return !(searchQuery && !rec.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+            !rec.description.toLowerCase().includes(searchQuery.toLowerCase()));
+
     });
 
     // Compter par type
