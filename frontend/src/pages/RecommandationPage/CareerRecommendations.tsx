@@ -16,7 +16,7 @@ const TABS: { key: RecommendationType | 'all'; label: string; icon: JSX.Element 
 
 export default function CareerRecommendations() {
     const [cvList, setCvList] = useState<CVSummary[]>([]);
-    const [selectedCV, setSelectedCV] = useState<CVSummary | null>(null);
+    const [selectedCVs, setSelectedCVs] = useState<CVSummary[]>([]);
     const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
     const [activeTab, setActiveTab] = useState<RecommendationType | 'all'>('all');
     const [filters, setFilters] = useState<RecommendationFilters>({});
@@ -25,42 +25,36 @@ export default function CareerRecommendations() {
     const [isLoadingRecs, setIsLoadingRecs] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Charger la liste des CVs
     useEffect(() => {
-        const fetchCVs = async () => {
-            setIsLoadingCVs(true);
-            try {
-                const cvs = await recommendationService.getUserCVs();
+        setIsLoadingCVs(true);
+
+        recommendationService.getUserCVs()
+            .then(cvs => {
                 setCvList(cvs);
-                if (cvs.length > 0) setSelectedCV(cvs[0]);
-            } catch (err) {
+                if(cvs.length > 0) setSelectedCVs(cvs.slice(0, 3)); //select first 3 CVs by default
+            })
+            .catch(err => {
                 console.error('Error fetching CVs:', err);
                 setError('Failed to load your CVs');
-            } finally {
-                setIsLoadingCVs(false);
-            }
-        };
-        fetchCVs();
+            })
+            .finally(() => setIsLoadingCVs(false));
     }, []);
 
-    // Charger les recommandations quand un CV est sélectionné
     useEffect(() => {
-        if (!selectedCV) return;
-        const fetchRecommendations = async () => {
-            setIsLoadingRecs(true);
-            setError(null);
-            try {
-                const recs = await recommendationService.getRecommendations(/*selectedCV.id, filters*/);
-                setRecommendations(recs);
-            } catch (err) {
+        if (selectedCVs.length <= 0) return;
+
+        setIsLoadingRecs(true);
+        setError(null);
+        const cvIds = selectedCVs.map(cv => cv.id);
+
+        recommendationService.getRecommendations(cvIds, filters)
+            .then(recs => setRecommendations(recs))
+            .catch(err => {
                 console.error('Error fetching recommendations:', err);
                 setError('Failed to load recommendations');
-            } finally {
-                setIsLoadingRecs(false);
-            }
-        };
-        fetchRecommendations();
-    }, [selectedCV, filters]);
+            })
+            .finally(() => setIsLoadingRecs(false));
+    }, [selectedCVs, filters]);
 
     const handleSaveRecommendation = async (id: string) => {
         try {
@@ -84,9 +78,9 @@ export default function CareerRecommendations() {
     // Filtrer les recommandations
     const filteredRecommendations = recommendations.filter(rec => {
         if (activeTab !== 'all' && rec.type !== activeTab) return false;
-        if (searchQuery && !rec.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-            !rec.description.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-        return true;
+        return !(searchQuery && !rec.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+            !rec.description.toLowerCase().includes(searchQuery.toLowerCase()));
+
     });
 
     // Compter par type
@@ -110,8 +104,8 @@ export default function CareerRecommendations() {
                     </p>
                 </div>
                 <button
-                    onClick={() => selectedCV && setFilters({ ...filters })}
-                    disabled={!selectedCV || isLoadingRecs}
+                    onClick={() => selectedCVs && setFilters({ ...filters })}
+                    disabled={selectedCVs.length > 0 || isLoadingRecs}
                     className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                     <svg className={`w-5 h-5 ${isLoadingRecs ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,13 +118,14 @@ export default function CareerRecommendations() {
             {/* CV Selector */}
             <CVSelector
                 cvList={cvList}
-                selectedCV={selectedCV}
-                onSelectCV={setSelectedCV}
+                selectedCVs={selectedCVs}
+                onSelectCV={(cvs) => setSelectedCVs(cvs as CVSummary[])}
                 isLoading={isLoadingCVs}
+                multiSelect={true}
             />
 
             {/* Main Content */}
-            {selectedCV && (
+            {selectedCVs && (
                 <>
                     {/* Search & Tabs */}
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
