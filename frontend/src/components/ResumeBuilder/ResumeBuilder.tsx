@@ -9,6 +9,10 @@ import ResumePreview from "./ResumePreview";
 import { TemplateSelector } from "./templateSelector";
 import PageBreadcrumb from "../common/PageBreadCrumb.tsx";
 
+// Installer ces packages:
+// npm install jspdf html2canvas
+// npm install --save-dev @types/jspdf
+
 const tabs = [
     {
         id: "template",
@@ -72,7 +76,8 @@ const tabs = [
 
 const ResumeBuilderContent: React.FC = () => {
     const [activeTab, setActiveTab] = useState("template");
-    const { selectedTemplate, setSelectedTemplate } = useResume();
+    const [isDownloading, setIsDownloading] = useState(false);
+    const { selectedTemplate, setSelectedTemplate, about, printElem } = useResume();
 
     const renderTab = () => {
         switch (activeTab) {
@@ -93,37 +98,83 @@ const ResumeBuilderContent: React.FC = () => {
         }
     };
 
+    const handleDownloadPDF = async () => {
+        if (!printElem?.current) {
+            alert("Resume preview not found!");
+            return;
+        }
+
+        setIsDownloading(true);
+
+        try {
+            // Dynamically import libraries
+            const html2canvas = (await import('html2canvas')).default;
+            const jsPDF = (await import('jspdf')).default;
+
+            const element = printElem.current;
+
+            // Capture the element as canvas
+            const canvas = await html2canvas(element, {
+                scale: 2, // Higher quality
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff'
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+
+            // A4 dimensions in mm
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+
+            // Calculate image dimensions to fit A4
+            const imgWidth = pdfWidth;
+            const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            // Add first page
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pdfHeight;
+
+            // Add additional pages if content is long
+            while (heightLeft > 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pdfHeight;
+            }
+
+            // Generate filename
+            const fileName = about.name
+                ? `${about.name.replace(/\s+/g, '_')}_Resume.pdf`
+                : 'Resume.pdf';
+
+            // Download the PDF
+            pdf.save(fileName);
+
+
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            alert('Failed to download PDF. Please try again.');
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
     return (
         <div className="space-y-6 p-5">
-            {/* Header */}
-            {/*<header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Resume Builder</h1>
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        Create and customize your professional resume
-                    </p>
-                </div>
-                <button
-                    type="button"
-                    onClick={() => window.print()}
-                    className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                        />
-                    </svg>
-                    Print Resume
-                </button>
-            </header>*/}
-
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                 {/* Left Panel - Form */}
-                <section className="flex flex-col lg:col-span-2 h-[calc(100vh-180px)]*">
+                <section className="flex flex-col lg:col-span-2 h-[calc(100vh-180px)]">
                     <div className="flex flex-col h-full border border-gray-200 rounded-2xl dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden">
                         {/* Tabs Navigation */}
                         <nav className="p-5 pb-0">
@@ -152,7 +203,7 @@ const ResumeBuilderContent: React.FC = () => {
                 </section>
 
                 {/* Right Panel - Preview */}
-                <section className="flex flex-col lg:col-span-3 h-[calc(100vh-180px)]*">
+                <section className="flex flex-col lg:col-span-3 h-[calc(100vh-180px)]">
                     <div className="flex flex-col h-full border border-gray-200 rounded-2xl dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden">
                         <header className="p-5 pb-4 border-b border-gray-200 dark:border-gray-700">
                             <div className="flex items-center justify-between">
@@ -181,20 +232,12 @@ const ResumeBuilderContent: React.FC = () => {
                     </div>
                 </section>
             </div>
-        </div>
-    );
-};
 
-const ResumeBuilder: React.FC = () => {
-    return (
-        <ResumeProvider>
-            <PageBreadcrumb pageTitle="Resume Builder"></PageBreadcrumb>
-            <ResumeBuilderContent />
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 p-5 border border-gray-200 rounded-2xl dark:border-gray-800 bg-white dark:bg-gray-900">
                 <button
                     type="button"
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 font-medium transition-colors"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium transition-colors"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
@@ -203,21 +246,26 @@ const ResumeBuilder: React.FC = () => {
                 </button>
                 <button
                     type="button"
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 font-medium transition-colors"
+                    onClick={handleDownloadPDF}
+                    disabled={isDownloading}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Download PDF
-                </button>
-                <button
-                    type="button"
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium transition-colors"
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                    </svg>
-                    Share Resume
+                    {isDownloading ? (
+                        <>
+                            <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Generating...
+                        </>
+                    ) : (
+                        <>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Download PDF
+                        </>
+                    )}
                 </button>
             </div>
 
@@ -242,7 +290,15 @@ const ResumeBuilder: React.FC = () => {
                     </div>
                 </div>
             </div>
+        </div>
+    );
+};
 
+const ResumeBuilder: React.FC = () => {
+    return (
+        <ResumeProvider>
+            <PageBreadcrumb pageTitle="Resume Builder"></PageBreadcrumb>
+            <ResumeBuilderContent />
         </ResumeProvider>
     );
 };
