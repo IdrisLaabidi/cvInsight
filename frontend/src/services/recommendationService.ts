@@ -67,8 +67,8 @@ export const recommendationService = {
     getRecommendations(cvIds: string[], recommendationFilters:RecommendationFilters){
         return axiosInstance
             .post<Recommendation[]>('/resume/career/recommendations', {
-                cvIds,
-                recommendationFilters
+                resumeIds:cvIds,
+                filters:recommendationFilters
             })
             .then((res) => res.data)
             .catch((error) => {

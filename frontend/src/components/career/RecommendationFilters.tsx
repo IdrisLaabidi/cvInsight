@@ -1,5 +1,9 @@
 import { useState } from 'react';
-import { RecommendationFilters as FiltersType, RecommendationLevel } from '../../types/recommendation.types';
+import {
+    RecommendationFilters as FiltersType,
+    RecommendationLevel,
+    RecommendationProvider
+} from '../../types/recommendation.types';
 
 interface RecommendationFiltersProps {
     filters: FiltersType;
@@ -26,7 +30,7 @@ export default function RecommendationFilters({ filters, onFiltersChange, onRese
         onFiltersChange({ ...filters, duration: newDurations });
     };
 
-    const handleProviderChange = (provider: string) => {
+    const handleProviderChange = (provider: RecommendationProvider) => {
         const currentProviders = filters.providers || [];
         const newProviders = currentProviders.includes(provider)
             ? currentProviders.filter(p => p !== provider)
@@ -34,15 +38,15 @@ export default function RecommendationFilters({ filters, onFiltersChange, onRese
         onFiltersChange({ ...filters, providers: newProviders });
     };
 
-    const handlePriceChange = (value: 'free' | 'all') => {
-        onFiltersChange({ ...filters, priceRange: value });
+    const handlePriceChange = (value: 'ALL' | 'FREE') => {
+        onFiltersChange({ ...filters, priceMode: value });
     };
 
     const hasActiveFilters = () => {
         return (filters.level?.length || 0) > 0 ||
             (filters.duration?.length || 0) > 0 ||
             (filters.providers?.length || 0) > 0 ||
-            filters.priceRange === 'free';
+            filters.priceMode === 'FREE';
     };
 
     return (
@@ -83,7 +87,7 @@ export default function RecommendationFilters({ filters, onFiltersChange, onRese
                 <div>
                     <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-3">Level</h4>
                     <div className="space-y-2">
-                        {(['beginner', 'intermediate', 'advanced'] as RecommendationLevel[]).map(level => (
+                        {(['BEGINNER', 'INTERMEDIATE', 'ADVANCED'] as RecommendationLevel[]).map(level => (
                             <label key={level} className="flex items-center gap-2 cursor-pointer group">
                                 <input
                                     type="checkbox"
@@ -92,7 +96,7 @@ export default function RecommendationFilters({ filters, onFiltersChange, onRese
                                     className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
                                 />
                                 <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white capitalize">
-                                    {level}
+                                    {level.toLowerCase()}
                                 </span>
                             </label>
                         ))}
@@ -104,10 +108,10 @@ export default function RecommendationFilters({ filters, onFiltersChange, onRese
                     <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-3">Duration</h4>
                     <div className="space-y-2">
                         {[
-                            { value: 'short', label: '< 1 month' },
-                            { value: 'medium', label: '1-3 months' },
-                            { value: 'long', label: '3-6 months' },
-                            { value: 'extended', label: '> 6 months' }
+                            { value: 'SHORT', label: '< 1 month' },
+                            { value: 'MEDIUM', label: '1-3 months' },
+                            { value: 'LONG', label: '3-6 months' },
+                            { value: 'EXTENDED', label: '> 6 months' }
                         ].map(duration => (
                             <label key={duration.value} className="flex items-center gap-2 cursor-pointer group">
                                 <input
@@ -132,8 +136,8 @@ export default function RecommendationFilters({ filters, onFiltersChange, onRese
                             <input
                                 type="radio"
                                 name="price"
-                                checked={filters.priceRange === 'all' || !filters.priceRange}
-                                onChange={() => handlePriceChange('all')}
+                                checked={filters.priceMode === 'ALL' || !filters.priceRange}
+                                onChange={() => handlePriceChange('ALL')}
                                 className="w-4 h-4 border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
                             />
                             <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">
@@ -144,8 +148,8 @@ export default function RecommendationFilters({ filters, onFiltersChange, onRese
                             <input
                                 type="radio"
                                 name="price"
-                                checked={filters.priceRange === 'free'}
-                                onChange={() => handlePriceChange('free')}
+                                checked={filters.priceMode === 'FREE'}
+                                onChange={() => handlePriceChange('FREE')}
                                 className="w-4 h-4 border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
                             />
                             <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">
@@ -159,16 +163,16 @@ export default function RecommendationFilters({ filters, onFiltersChange, onRese
                 <div>
                     <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-3">Provider</h4>
                     <div className="space-y-2">
-                        {['Coursera', 'Udemy', 'LinkedIn Learning', 'AWS', 'Google', 'Microsoft'].map(provider => (
+                        {(['COURSERA' , 'UDEMY' , 'LINKEDIN' , 'AWS' , 'GOOGLE' , 'MICROSOFT'] as RecommendationProvider[]).map(provider => (
                             <label key={provider} className="flex items-center gap-2 cursor-pointer group">
                                 <input
                                     type="checkbox"
-                                    checked={filters.providers?.includes(provider.toLowerCase()) || false}
-                                    onChange={() => handleProviderChange(provider.toLowerCase())}
+                                    checked={filters.providers?.includes(provider) || false}
+                                    onChange={() => handleProviderChange(provider)}
                                     className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
                                 />
                                 <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">
-                                    {provider}
+                                    {provider.toLowerCase()}
                                 </span>
                             </label>
                         ))}

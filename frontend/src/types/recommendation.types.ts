@@ -1,6 +1,6 @@
-export type RecommendationType = 'course' | 'certification' | 'training' | 'opportunity';
-export type RecommendationLevel = 'beginner' | 'intermediate' | 'advanced';
-export type RecommendationProvider = 'coursera' | 'udemy' | 'linkedin' | 'aws' | 'google' | 'microsoft' | 'other';
+export type RecommendationType = 'COURSE' | 'CERTIFICATION' | 'TRAINING' | 'OPPORTUNITY';
+export type RecommendationLevel = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+export type RecommendationProvider = 'COURSERA' | 'UDEMY' | 'LINKEDIN' | 'AWS' | 'GOOGLE' | 'MICROSOFT' | 'OTHER';
 
 export interface Recommendation {
     id: string;
@@ -35,7 +35,8 @@ export interface CVSummary {
 export interface RecommendationFilters {
     type?: RecommendationType;
     level?: RecommendationLevel[];
-    priceRange?: { min: number; max: number } | 'free' | 'all';
+    priceRange?: { min: number; max: number };
+    priceMode?:'FREE' | 'ALL';
     duration?: string[];
     providers?: string[];
     searchQuery?: string;

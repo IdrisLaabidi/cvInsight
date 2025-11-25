@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import fst.cvinsight.backend.dto.ResumeDto;
 import fst.cvinsight.backend.entity.Resume;
 import fst.cvinsight.backend.exception.ResumeProcessingException;
+import fst.cvinsight.backend.model.CareerRecommendationRequest;
 import fst.cvinsight.backend.service.ResumeService;
 import fst.cvinsight.backend.util.DocumentUtils;
 import lombok.AllArgsConstructor;
@@ -129,8 +130,8 @@ public class ResumeController {
         return ResponseEntity.ok(resumeService.analyzeResume(id));
     }
 
-    @GetMapping("/career/recommendations")
-    public ResponseEntity<JsonNode> recommendations() {
+    @PostMapping("/career/recommendations")
+    public ResponseEntity<JsonNode> recommendations(@RequestBody CareerRecommendationRequest request) {
         return ResponseEntity.ok(resumeService.careerRecommendations());
     }
 
