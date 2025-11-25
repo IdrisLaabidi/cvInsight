@@ -69,7 +69,7 @@ export const recommendationService = {
             .post<Recommendation[]>('/resume/career/recommendations', {
                 resumeIds:cvIds,
                 filters:recommendationFilters
-            })
+            },{timeout: 0})
             .then((res) => res.data)
             .catch((error) => {
                 throw new Error(error?.response?.data?.message || 'Failed to fetch recommendations.');

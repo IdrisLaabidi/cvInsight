@@ -2,13 +2,11 @@ package fst.cvinsight.backend.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.util.List;
 
 @Getter
 @Setter
-@ToString
 class RecommendationFilters {
 
     private RecommendationType type;

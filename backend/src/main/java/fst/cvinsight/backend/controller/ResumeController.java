@@ -132,7 +132,7 @@ public class ResumeController {
 
     @PostMapping("/career/recommendations")
     public ResponseEntity<JsonNode> recommendations(@RequestBody CareerRecommendationRequest request) {
-        return ResponseEntity.ok(resumeService.careerRecommendations());
+        return ResponseEntity.ok(resumeService.careerRecommendations(request));
     }
 
     @GetMapping("/{id}/file")

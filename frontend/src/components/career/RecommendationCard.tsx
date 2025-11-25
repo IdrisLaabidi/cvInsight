@@ -3,8 +3,8 @@ import { Recommendation } from '../../types/recommendation.types';
 
 interface RecommendationCardProps {
     recommendation: Recommendation;
-    onSave: (id: string) => void;
-    onUnsave: (id: string) => void;
+    onSave: (id?: string) => void;
+    onUnsave: (id?: string) => void;
 }
 
 export default function RecommendationCard({ recommendation, onSave, onUnsave }: RecommendationCardProps) {
@@ -15,9 +15,9 @@ export default function RecommendationCard({ recommendation, onSave, onUnsave }:
         setIsLoading(true);
         try {
             if (isSaved) {
-                await onUnsave(recommendation.id);
+                onUnsave(recommendation.id);
             } else {
-                await onSave(recommendation.id);
+                onSave(recommendation.id);
             }
             setIsSaved(!isSaved);
         } catch (error) {
@@ -89,7 +89,7 @@ export default function RecommendationCard({ recommendation, onSave, onUnsave }:
                     </div>
                     <div>
                         <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                            {recommendation.type}
+                            {recommendation.type.toLowerCase()}
                         </span>
                         <p className="text-sm text-gray-600 dark:text-gray-400">{recommendation.provider}</p>
                     </div>

@@ -56,14 +56,14 @@ export default function CareerRecommendations() {
             .finally(() => setIsLoadingRecs(false));
     }, [selectedCVs, filters]);
 
-    const handleSaveRecommendation = async (id: string) => {
+    const handleSaveRecommendation = async (id?: string) => {
         try {
             //await recommendationService.saveRecommendation(id);
             setRecommendations(prev => prev.map(r => r.id === id ? { ...r, isSaved: true } : r));
         } catch (err) { console.error('Error saving:', err); }
     };
 
-    const handleUnsaveRecommendation = async (id: string) => {
+    const handleUnsaveRecommendation = async (id?: string) => {
         try {
             //await recommendationService.unsaveRecommendation(id);
             setRecommendations(prev => prev.map(r => r.id === id ? { ...r, isSaved: false } : r));

@@ -12,12 +12,14 @@ import fst.cvinsight.backend.exception.ResumeExtractionException;
 import fst.cvinsight.backend.exception.ResumeProcessingException;
 import fst.cvinsight.backend.exception.ResumeStorageException;
 import fst.cvinsight.backend.mapper.ResumeMapper;
+import fst.cvinsight.backend.model.CareerRecommendationRequest;
 import fst.cvinsight.backend.model.ResumeOrigin;
 import fst.cvinsight.backend.repo.ResumeRepository;
 import fst.cvinsight.backend.util.DocumentUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.template.st.StTemplateRenderer;
 import org.springframework.security.access.AccessDeniedException;
@@ -263,57 +265,77 @@ public class ResumeService {
         }
     }
 
-    public JsonNode careerRecommendations() {
-
-        UserInfo user= userInfoService.getCurrentUser();
-        List<Resume> resumes = resumeRepository.findAllByUploadedBy(user);
+    public JsonNode careerRecommendations(CareerRecommendationRequest request) {
+        List<Resume> resumes = resumeRepository.findAllById(request.getResumeIds());
 
         ArrayNode resumeArray = objectMapper.createArrayNode();
         for (Resume r : resumes) {
             resumeArray.add(r.getJsonContent());
         }
 
+        JsonNode filterNode = objectMapper.valueToTree(request.getFilters());
+
         String prompt = """
-            You are a professional career advisor. Your task is to analyze all user resumes and produce career guidance.
-        
-            BELOW IS IMPORTANT — FOLLOW STRICTLY:
-        
+            You are a professional career advisor. Your task is to analyze the user's selected resumes
+            and generate structured, filter-aware career recommendations.
+    
             ### INPUT
-            The following is an array of resumes in JSON format:
+            1. **Selected resumes (JSON array)**:
             %s
         
+            2. **User filters (JSON object)**:
+            %s
+    
             ### YOUR TASK
-            Based on ALL extracted skills, certifications, education, and work experience across *all* provided resumes:
-              - Identify missing or in-demand skills the user should learn.
-              - Recommend relevant certifications.
-              - Recommend online courses (well-known platforms only).
-              - Suggest job roles suitable for the user.
-              - Identify skill gaps.
-              - Create a clear, step-by-step personalized career growth plan.
+            Based on all resumes and taking the filters strictly into account:
+            - Generate personalized recommendations (courses, certifications, job roles, learning paths).
+            - For each recommendation, ensure it respects the filters:
+              - type filter → only include matching recommendation types
+              - level filter → match user’s preferred levels
+              - priceRange or "free" → ensure price filtering is respected
+              - duration → match preferred duration categories
+              - providers → match only providers included
+              - searchQuery → match text in title or description
         
-            ### STRICT OUTPUT RULES — DO NOT BREAK THESE:
-            1. **Output ONLY valid JSON. No explanations, no extra text, no markdown.**
-            2. **The JSON MUST be syntactically valid and must follow the exact schema below.**
-            3. **Every field MUST be present; empty fields must be empty arrays.**
-            4. **Do NOT include comments or trailing commas.**
-            5. **All strings should be plain strings (no line breaks inside).**
-        
-            ### REQUIRED JSON SCHEMA (OUTPUT MUST MATCH EXACTLY):
+            ### STRICT OUTPUT RULES
+            1. **Output ONLY valid JSON.**
+            2. **Output MUST be a JSON ARRAY of recommendation objects.**
+            3. **Every field MUST exist per item.**
+            4. **No comments, no explanations, no markdown, no trailing text.**
+            5. **Strings must not contain line breaks.**
+            6. **If no results match the filters, return an **empty JSON array []**
+    
+            ### REQUIRED JSON ARRAY SCHEMA
+            Each recommendation MUST follow the exact structure:
+    
             {
-              "recommendedCertifications": ["", ""],
-              "recommendedCourses": ["", ""],
-              "recommendedJobRoles": ["", ""],
-              "skillsToImprove": ["", ""],
-              "careerPlan": ["step1", "step2", "step3"]
+              "type": "COURSE" | "CERTIFICATION" | "TRAINING" | "OPPORTUNITY",
+              "title": "string",
+              "provider": "string",
+              "description": "string",
+              "matchScore": 0,
+              "level": "BEGINNER | INTERMEDIATE | ADVANCED",
+              "duration": "string",
+              "price": 0,
+              "url": "string",
+              "skills": ["skill1", "skill2"],
+              "whyRecommended": "string",
+              "category": "string or null"
             }
-        
+    
             ### FINAL INSTRUCTION
-            Respond with **ONLY** the JSON object defined above. If unsure, output empty arrays.
-        """.formatted(resumeArray.toPrettyString());
-
+            Respond with **ONLY the JSON ARRAY** of recommendation objects** Without any surrounding text.
+        """.formatted(
+                resumeArray.toPrettyString(),
+                filterNode.toPrettyString()
+        );
 
         try {
-            String response = chatClient.prompt(prompt).call().content();
+            String response = chatClient
+                    .prompt(prompt)
+                    .options(ChatOptions.builder().temperature(0.25).build())
+                    .call()
+                    .content();
             return objectMapper.readTree(response);
         } catch (Exception e) {
             throw new ResumeAnalysisException(e);

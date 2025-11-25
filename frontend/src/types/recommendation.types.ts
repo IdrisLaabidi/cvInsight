@@ -3,7 +3,7 @@ export type RecommendationLevel = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
 export type RecommendationProvider = 'COURSERA' | 'UDEMY' | 'LINKEDIN' | 'AWS' | 'GOOGLE' | 'MICROSOFT' | 'OTHER';
 
 export interface Recommendation {
-    id: string;
+    id?: string;
     type: RecommendationType;
     title: string;
     provider: string;
