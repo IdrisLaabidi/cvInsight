@@ -32,4 +32,5 @@ public class Resume {
     private JsonNode jsonContent;
     @Enumerated(EnumType.STRING)
     private ResumeOrigin origin;
+    private Double score;
 }

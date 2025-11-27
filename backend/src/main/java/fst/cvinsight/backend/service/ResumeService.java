@@ -204,7 +204,7 @@ public class ResumeService {
     }
 
     public JsonNode analyzeResume(UUID resumeId) {
-        ResumeDto resume = getResumeDtoById(resumeId);
+        Resume resume = getResumeById(resumeId);
 
         String resumeJson = resume.getJsonContent().toString();
 
@@ -257,7 +257,13 @@ public class ResumeService {
 
         try {
             String response = chatClient.prompt(prompt).call().content();
-            return objectMapper.readTree(response);
+            JsonNode result =  objectMapper.readTree(response);
+            JsonNode scoreNode = result.get("score");
+            if (scoreNode != null) {
+                resume.setScore(scoreNode.asDouble());
+                resumeRepository.save(resume);
+            }
+            return result;
         } catch (JsonProcessingException ex) {
             throw new ResumeProcessingException(ex.getMessage(),ex);
         } catch (Exception e) {

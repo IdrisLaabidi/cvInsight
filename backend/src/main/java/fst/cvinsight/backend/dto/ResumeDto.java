@@ -21,4 +21,5 @@ public class ResumeDto implements Serializable {
     LocalDateTime uploadedAt;
     JsonNode jsonContent;
     ResumeOrigin origin;
+    Double score;
 }

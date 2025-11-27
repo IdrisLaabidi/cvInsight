@@ -6,7 +6,8 @@ export interface ResumeDto {
     filename: string;
     contentType: string;
     uploadedAt: string;
-    jsonContent?: string;
+    jsonContent?: any;
+    score?: number;
 }
 
 export const recommendationService = {
@@ -22,11 +23,11 @@ export const recommendationService = {
                     id: resume.id,
                     fileName: resume.filename,
                     uploadedAt: resume.uploadedAt,
-                    detectedSkills: [], // TODO: Extract when jsonContent schema defined
+                    detectedSkills: resume.jsonContent?.skills || [],
                     experienceLevel: '',
                     mainDomain: '',
                     skillGaps: [],
-                    completenessScore: 0,
+                    completenessScore: resume.score || 0,
                 }))
             )
             .catch((error) => {
