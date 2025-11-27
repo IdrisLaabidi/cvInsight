@@ -102,7 +102,7 @@ export default function CVSelector({
             </div>
 
             {/* CV List */}
-            <div className="space-y-2 ">
+            <div className="space-y-2 max-h-64 overflow-y-auto">
                 {cvList.map((cv) => {
                     const selected = isSelected(cv.id);
 

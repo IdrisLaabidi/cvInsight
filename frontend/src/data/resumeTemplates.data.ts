@@ -1,4 +1,4 @@
-import {ResumeTemplate} from "../types/resumeTemplates.types.ts";
+import {ResumeTemplate} from "../types/resume.types.ts";
 
 export const RESUME_TEMPLATES: ResumeTemplate[] = [
     {

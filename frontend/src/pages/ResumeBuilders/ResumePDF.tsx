@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Document, Page, View, Text, StyleSheet, Image } from "@react-pdf/renderer";
+import { ResumeContent } from '../../types/resume.types';
 
 // Simple styles for the PDF - two-column layout
 const styles = StyleSheet.create({
@@ -67,28 +68,27 @@ const styles = StyleSheet.create({
 });
 
 type Props = {
-    values: any;
+    content: ResumeContent;
     photoDataUrl?: string | null;
+    selectedTemplateIds?: string[];
 };
 
-const ResumePDF: React.FC<Props> = ({ values, photoDataUrl }) => {
-    const { personal = {}, skills = [], languages = [], experiences = [], education = [], projects = [] } = values;
+const ResumePDF: React.FC<Props> = ({ content, photoDataUrl }) => {
+    const { personal = {}, skills = [], languages = [], experience = [], education = [], projects = [] } = content;
 
     return (
         <Document>
             <Page size="A4" style={styles.page}>
                 <View style={styles.leftCol}>
                     {photoDataUrl && <Image src={photoDataUrl} style={styles.image} />}
-                    <Text style={styles.name}>
-                        {personal.firstName || ""} {personal.lastName || ""}
-                    </Text>
-                    <Text style={styles.title}>{personal.title || ""}</Text>
+                    <Text style={styles.name}>{personal.fullName || ""}</Text>
 
                     <Text style={styles.sectionHeader}>Contact</Text>
                     {personal.email && <Text style={styles.smallText}>{personal.email}</Text>}
                     {personal.phone && <Text style={styles.smallText}>{personal.phone}</Text>}
-                    {personal.location && <Text style={styles.smallText}>{personal.location}</Text>}
-                    {personal.website && <Text style={styles.smallText}>{personal.website}</Text>}
+                    {personal.otherProfiles && personal.otherProfiles.map((p: string, i: number) => (
+                        <Text key={i} style={styles.smallText}>{p}</Text>
+                    ))}
 
                     <Text style={styles.sectionHeader}>Skills</Text>
                     {skills.map((s: string, idx: number) => (
@@ -97,23 +97,23 @@ const ResumePDF: React.FC<Props> = ({ values, photoDataUrl }) => {
 
                     <Text style={styles.sectionHeader}>Languages</Text>
                     {languages.map((l: any, i: number) => (
-                        <Text key={i} style={styles.skillText}>{l.lang} — {l.level}</Text>
+                        <Text key={i} style={styles.skillText}>{l.name} — {l.level}</Text>
                     ))}
                 </View>
 
                 <View style={styles.rightCol}>
-                    {values.summary && (
+                    {content.summary && (
                         <>
                             <Text style={styles.sectionHeader}>Summary</Text>
-                            <Text style={styles.paragraph}>{values.summary}</Text>
+                            <Text style={styles.paragraph}>{content.summary}</Text>
                         </>
                     )}
 
                     <Text style={styles.sectionHeader}>Experience</Text>
-                    {experiences.map((exp: any, i: number) => (
+                    {experience.map((exp: any, i: number) => (
                         <View key={i} style={{ marginBottom: 6 }}>
                             <Text style={styles.expTitle}>{exp.title || ""} — {exp.company || ""}</Text>
-                            <Text style={styles.expSubtitle}>{exp.start || ""} — {exp.end || ""}</Text>
+                            <Text style={styles.expSubtitle}>{exp.startDate || ""} — {exp.endDate || ""}</Text>
                             {exp.description && <Text style={styles.paragraph}>{exp.description}</Text>}
                         </View>
                     ))}
@@ -122,7 +122,7 @@ const ResumePDF: React.FC<Props> = ({ values, photoDataUrl }) => {
                     {education.map((edu: any, i: number) => (
                         <View key={i} style={{ marginBottom: 6 }}>
                             <Text style={styles.expTitle}>{edu.degree || ""} — {edu.institution || ""}</Text>
-                            <Text style={styles.expSubtitle}>{edu.start || ""} — {edu.end || ""}</Text>
+                            <Text style={styles.expSubtitle}>{edu.startDate || ""} — {edu.endDate || ""}</Text>
                             {edu.description && <Text style={styles.paragraph}>{edu.description}</Text>}
                         </View>
                     ))}

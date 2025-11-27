@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AgentMigrationStateService">
+    <option name="pendingSessionIds">
+      <option value="050aae32-ee55-455f-bf30-59a154bc13a3" />
+    </option>
+    <option name="pendingTurns">
+      <map>
+        <entry key="050aae32-ee55-455f-bf30-59a154bc13a3">
+          <value>
+            <set>
+              <option value="176a7d79-97b3-4673-bb22-6cb8b9a2c134" />
+            </set>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <pendingWorkingSetItems>
+      <entry key="050aae32-ee55-455f-bf30-59a154bc13a3">
+        <set>
+          <option value="file://$PROJECT_DIR$/frontend/src/types/resumeContent.types.ts" />
+          <option value="file://$PROJECT_DIR$/frontend/src/pages/ResumeBuilders/CVBuilder.tsx" />
+          <option value="file://$PROJECT_DIR$/frontend/src/pages/ResumeBuilders/ResumePDF.tsx" />
+        </set>
+      </entry>
+    </pendingWorkingSetItems>
+  </component>
+</project>

@@ -75,7 +75,7 @@ const CVBuilder: React.FC = () => {
     const [formValues, setFormValues] = useState(initialValues);
 
     const pdfDocument = useMemo(
-        () => <ResumePDF values={formValues} photoDataUrl={photoDataUrl} />,
+        () => <ResumePDF content={formValues} photoDataUrl={photoDataUrl} />,
         [formValues, photoDataUrl]
     );
 

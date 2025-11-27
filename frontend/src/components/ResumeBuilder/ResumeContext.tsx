@@ -1,6 +1,6 @@
 import  { createContext, useContext, useState, useRef, ReactNode, RefObject, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { TemplateTheme } from '../../types/resumeTemplates.types';
+import { TemplateTheme } from '../../types/resume.types.ts';
 import { RESUME_TEMPLATES } from '../../data/resumeTemplates.data';
 
 export type TemplateType = "modern" | "minimalist" | "professional";
