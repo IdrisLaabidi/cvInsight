@@ -53,7 +53,7 @@ public class ResumeService {
 
         String result;
         try {
-            String prompt = buildAnalysisPrompt(resumeContent);
+            String prompt = buildExtractionPrompt(resumeContent);
             result =  chatClient.prompt(prompt)
                     .call()
                     .content();
@@ -90,7 +90,7 @@ public class ResumeService {
         }
     }
 
-    private String buildAnalysisPrompt(String resumeContent) {
+    private String buildExtractionPrompt(String resumeContent) {
         PromptTemplate promptTemplate = PromptTemplate.builder()
                 .renderer(StTemplateRenderer.builder().startDelimiterToken('<').endDelimiterToken('>').build())
                 .template("""
@@ -103,6 +103,7 @@ public class ResumeService {
                       certifications, skills, spoken languages, and social or community involvement.
                     - Use **null** for missing data (do not skip fields).
                     - Dates should be in ISO format: YYYY-MM if available.
+                    - For Array fields, use an empty array if there are no items.
                     - Ensure the output is **strictly valid JSON**, no explanations or comments.
         
                     Resume text:
@@ -112,41 +113,44 @@ public class ResumeService {
         
                     Return JSON in the following structure:
                     {
-                      "personal": {
-                        "fullName": "",
+                      "about": {
+                        "name": "",
                         "email": "",
                         "phone": "",
                         "address": "",
                         "linkedin": "",
                         "github": "",
+                        "role": "",
+                        "portfolio": "",
+                        "summary": "",
                         "otherProfiles": []
                       },
-                      "summary": "",
                       "education": [
                         {
                           "degree": "",
-                          "institution": "",
-                          "startDate": "",
-                          "endDate": "",
-                          "description": ""
+                          "school": "Institution name",
+                          "startYr": "2022",
+                          "endYr": "2025",
+                          "grade": ""
                         }
                       ],
-                      "experience": [
+                      "work": [
                         {
-                          "title": "",
+                          "position": "",
                           "company": "",
                           "startDate": "",
                           "endDate": "",
                           "description": "",
-                          "type": "job|internship"
+                          "type": "Full-Time|Internship|Part-Time|Freelance"
                         }
                       ],
                       "projects": [
                         {
                           "name": "",
                           "description": "",
+                          "github": "",
                           "technologies": [],
-                          "link": ""
+                          "url": ""
                         }
                       ],
                       "skills": ["", "", ""],

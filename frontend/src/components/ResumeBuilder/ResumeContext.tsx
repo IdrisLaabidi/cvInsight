@@ -49,7 +49,26 @@ export interface Project {
     github: string;
     description: string;
 }
+//TODO: Add languages , social activities and certifications
+export interface Language {
+    id: string;
+    name: string;
+    level: string;
+}
 
+export interface Certificate {
+    id: string;
+    title: string;
+    issuer: string;
+    date: string;
+}
+
+export interface SocialActivity {
+    id: string;
+    role: string;
+    organization: string;
+    description: string;
+}
 interface ResumeContextType {
     about: About;
     setAbout: (about: About) => void;
