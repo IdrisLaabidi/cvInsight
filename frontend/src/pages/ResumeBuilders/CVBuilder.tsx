@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-require-imports */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import React, {useMemo, useState} from "react";
 import { Formik, Form, Field, FieldArray } from "formik";
@@ -9,38 +7,9 @@ import { PDFViewer } from "@react-pdf/renderer";
 import ResumePDF from "./ResumePDF";
 import SectionTitle from "../../components/form/SectionTitle";
 import DynamicFieldArray from "../../components/form/DynamicFieldArray";
-
-
-let Input: any = null;
-let TextArea: any = null;
-let FileInput: any = null;
-
-try {
-    // If these do not exist, the fallback below will be used.
-    const inputModule = require("../../components/form/input/InputField");
-    Input = inputModule.default || inputModule.Input || inputModule;
-} catch (e) {
-    /* fallback Input component */
-    Input = ({ field, form, ...props }: any) => {
-        return <input {...field} {...props} className="w-full rounded border p-2" />;
-    };
-}
-
-try {
-    const ta = require("../../components/form/form-elements/TextAreaInput");
-    TextArea = ta.default || ta;
-} catch (e) {
-    TextArea = ({ field, ...props }: any) => <textarea {...field} {...props} className="w-full rounded border p-2" />;
-}
-
-try {
-    const fi = require("../../components/form/form-elements/FileInputExample");
-    FileInput = fi.default || fi;
-} catch (e) {
-    FileInput = ({ onChange }: any) => (
-        <input type="file" accept="image/*" onChange={onChange} />
-    );
-}
+import InputField from "../../components/form/input/InputField.tsx";
+import TextArea from "../../components/form/input/TextArea.tsx";
+import FileInput from "../../components/form/input/FileInput.tsx";
 
 /* Initial values */
 const initialValues = {
@@ -91,7 +60,7 @@ const validationSchema = Yup.object().shape({
     }),
 });
 
-const ResumeBuilder: React.FC = () => {
+const CVBuilder: React.FC = () => {
     const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(null);
 
     function toDataUrl(file: File): Promise<string> {
@@ -140,26 +109,26 @@ const ResumeBuilder: React.FC = () => {
                                                 <SectionTitle title="Personal information" />
                                                 <div className="grid grid-cols-2 gap-3">
                                                     <Field name="personal.firstName">
-                                                        {({ field }: any) => <Input {...field} placeholder="First name" />}
+                                                        {({ field }: any) => <InputField {...field} placeholder="First name" />}
                                                     </Field>
                                                     <Field name="personal.lastName">
-                                                        {({ field }: any) => <Input {...field} placeholder="Last name" />}
+                                                        {({ field }: any) => <InputField {...field} placeholder="Last name" />}
                                                     </Field>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-3 mt-3">
                                                     <Field name="personal.email">
-                                                        {({ field }: any) => <Input {...field} placeholder="Email" />}
+                                                        {({ field }: any) => <InputField {...field} placeholder="Email" />}
                                                     </Field>
                                                     <Field name="personal.phone">
-                                                        {({ field }: any) => <Input {...field} placeholder="Phone" />}
+                                                        {({ field }: any) => <InputField {...field} placeholder="Phone" />}
                                                     </Field>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-3 mt-3">
                                                     <Field name="personal.location">
-                                                        {({ field }: any) => <Input {...field} placeholder="Location" />}
+                                                        {({ field }: any) => <InputField {...field} placeholder="Location" />}
                                                     </Field>
                                                     <Field name="personal.website">
-                                                        {({ field }: any) => <Input {...field} placeholder="Website / LinkedIn" />}
+                                                        {({ field }: any) => <InputField {...field} placeholder="Website / LinkedIn" />}
                                                     </Field>
                                                 </div>
 
@@ -200,7 +169,7 @@ const ResumeBuilder: React.FC = () => {
                                                             renderItem={(idx, remove) => (
                                                                 <div className="flex gap-2 items-center">
                                                                     <Field name={`skills[${idx}]`}>
-                                                                        {({field}: any) => <Input {...field}
+                                                                        {({field}: any) => <InputField {...field}
                                                                                                   placeholder="Skill name"/>}
                                                                     </Field>
                                                                     <button type="button" onClick={() => remove(idx)}
@@ -225,11 +194,11 @@ const ResumeBuilder: React.FC = () => {
                                                             renderItem={(idx, remove) => (
                                                                 <div className="grid grid-cols-3 gap-2 items-center">
                                                                     <Field name={`languages[${idx}].lang`}>
-                                                                        {({field}: any) => <Input {...field}
+                                                                        {({field}: any) => <InputField {...field}
                                                                                                   placeholder="Language"/>}
                                                                     </Field>
                                                                     <Field name={`languages[${idx}].level`}>
-                                                                        {({field}: any) => <Input {...field}
+                                                                        {({field}: any) => <InputField {...field}
                                                                                                   placeholder="Level (native / fluent / basic)"/>}
                                                                     </Field>
                                                                     <button type="button" onClick={() => remove(idx)}
@@ -255,21 +224,21 @@ const ResumeBuilder: React.FC = () => {
                                                                 <>
                                                                     <div className="grid grid-cols-2 gap-2">
                                                                         <Field name={`experiences[${idx}].title`}>
-                                                                            {({field}: any) => <Input {...field}
+                                                                            {({field}: any) => <InputField {...field}
                                                                                                       placeholder="Job title"/>}
                                                                         </Field>
                                                                         <Field name={`experiences[${idx}].company`}>
-                                                                            {({field}: any) => <Input {...field}
+                                                                            {({field}: any) => <InputField {...field}
                                                                                                       placeholder="Company"/>}
                                                                         </Field>
                                                                     </div>
                                                                     <div className="grid grid-cols-2 gap-2 mt-2">
                                                                         <Field name={`experiences[${idx}].start`}>
-                                                                            {({field}: any) => <Input {...field}
+                                                                            {({field}: any) => <InputField {...field}
                                                                                                       placeholder="Start (e.g. Jan 2020)"/>}
                                                                         </Field>
                                                                         <Field name={`experiences[${idx}].end`}>
-                                                                            {({field}: any) => <Input {...field}
+                                                                            {({field}: any) => <InputField {...field}
                                                                                                       placeholder="End (e.g. Present)"/>}
                                                                         </Field>
                                                                     </div>
@@ -305,21 +274,21 @@ const ResumeBuilder: React.FC = () => {
                                                                 <>
                                                                     <div className="grid grid-cols-2 gap-2">
                                                                         <Field name={`education[${idx}].degree`}>
-                                                                            {({field}: any) => <Input {...field}
+                                                                            {({field}: any) => <InputField {...field}
                                                                                                       placeholder="Degree (e.g. BSc Computer Science)"/>}
                                                                         </Field>
                                                                         <Field name={`education[${idx}].institution`}>
-                                                                            {({field}: any) => <Input {...field}
+                                                                            {({field}: any) => <InputField {...field}
                                                                                                       placeholder="Institution"/>}
                                                                         </Field>
                                                                     </div>
                                                                     <div className="grid grid-cols-2 gap-2 mt-2">
                                                                         <Field name={`education[${idx}].start`}>
-                                                                            {({field}: any) => <Input {...field}
+                                                                            {({field}: any) => <InputField {...field}
                                                                                                       placeholder="Start (year)"/>}
                                                                         </Field>
                                                                         <Field name={`education[${idx}].end`}>
-                                                                            {({field}: any) => <Input {...field}
+                                                                            {({field}: any) => <InputField {...field}
                                                                                                       placeholder="End (year)"/>}
                                                                         </Field>
                                                                     </div>
@@ -354,7 +323,7 @@ const ResumeBuilder: React.FC = () => {
                                                             renderItem={(idx, remove) => (
                                                                 <>
                                                                     <Field name={`projects[${idx}].name`}>
-                                                                        {({field}: any) => <Input {...field}
+                                                                        {({field}: any) => <InputField {...field}
                                                                                                   placeholder="Project name"/>}
                                                                     </Field>
                                                                     <div className="mt-2">
@@ -395,4 +364,4 @@ const ResumeBuilder: React.FC = () => {
     );
 };
 
-export default ResumeBuilder;
+export default CVBuilder;
