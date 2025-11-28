@@ -50,6 +50,7 @@ export interface Project {
     description: string;
 }
 //TODO: Add languages , social activities and certifications
+
 export interface Language {
     id: string;
     name: string;
@@ -60,7 +61,7 @@ export interface Certificate {
     id: string;
     title: string;
     issuer: string;
-    date: string;
+    year: string;
 }
 
 export interface SocialActivity {
@@ -84,6 +85,12 @@ interface ResumeContextType {
     setWorkList: (workList: Work[]) => void;
     projects: Project[];
     setProjects: (projects: Project[]) => void;
+    languages: Language[];
+    setLanguages: (languages: Language[]) => void;
+    certificates: Certificate[];
+    setCertificates: (certificates: Certificate[]) => void;
+    socialActivities: SocialActivity[];
+    setSocialActivities: (socialActivities: SocialActivity[]) => void;
     template: TemplateType;
     setTemplate: (template: TemplateType) => void;
     printElem: RefObject<HTMLDivElement | null>;
@@ -161,6 +168,17 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
     const [projects, setProjects] = useState<Project[]>([
         { id: uuidv4(), name: "", url: "", github: "", description: "" },
     ]);
+    const [languages, setLanguages] = useState<Language[]>([
+        {id:uuidv4(), name: "", level: "" },
+    ]);
+
+    const [certificates, setCertificates] = useState<Certificate[]>([
+        {id:uuidv4(), title: "", issuer: "", year: "" },
+    ]);
+
+    const [socialActivities, setSocialActivities] = useState<SocialActivity[]>([
+        {id:uuidv4(), role: "", organization: "", description: "" },
+    ]);
 
     return (
         <ResumeContext.Provider
@@ -179,6 +197,12 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
                 setWorkList,
                 projects,
                 setProjects,
+                languages,
+                setLanguages,
+                certificates,
+                setCertificates,
+                socialActivities,
+                setSocialActivities,
                 template,
                 setTemplate,
                 printElem,

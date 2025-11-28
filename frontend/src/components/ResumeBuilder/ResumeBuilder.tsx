@@ -8,6 +8,9 @@ import Projects from "./Projects";
 import ResumePreview from "./ResumePreview";
 import { TemplateSelector } from "./templateSelector";
 import PageBreadcrumb from "../common/PageBreadCrumb.tsx";
+import SocialActivities from "./SocialActivities";
+import Certifications from "./Certifications";
+import Languages from "./Languages";
 
 // Installer ces packages:
 // npm install jspdf html2canvas
@@ -72,6 +75,33 @@ const tabs = [
             </svg>
         ),
     },
+    {
+        id: "certifications",
+        label: "Certifications",
+        icon: (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 16c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm0-4c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" />
+            </svg>
+        ),
+    },
+    {
+        id: "languages",
+        label: "Languages",
+        icon: (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M19 7l-7-5-7 5v10l7 5 7-5V7z" />
+            </svg>
+        ),
+    },
+    {
+        id: "socialActivities",
+        label: "Social Activities",
+        icon: (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 16c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm0-4c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" />
+            </svg>
+        ),
+    },
 ];
 
 const ResumeBuilderContent: React.FC = () => {
@@ -93,6 +123,12 @@ const ResumeBuilderContent: React.FC = () => {
                 return <Skills />;
             case "projects":
                 return <Projects />;
+            case "certifications":
+                return <Certifications />;
+            case "languages":
+                return <Languages />;
+            case "socialActivities":
+                return <SocialActivities />;
             default:
                 return null;
         }
