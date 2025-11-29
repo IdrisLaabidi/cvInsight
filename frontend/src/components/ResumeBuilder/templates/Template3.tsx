@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
   text: { fontSize: 11, lineHeight: 1.4 },
 });
 
-const HealthGreenTemplate: React.FC<ResumePdfProps> = ({
+const Template3: React.FC<ResumePdfProps> = ({
   about,
   educationList,
   workList,
@@ -143,4 +143,4 @@ const HealthGreenTemplate: React.FC<ResumePdfProps> = ({
   </Document>
 );
 
-export default HealthGreenTemplate;
+export default Template3;

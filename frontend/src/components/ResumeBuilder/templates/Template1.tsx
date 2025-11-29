@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
   bullet: { marginBottom: 4 },
 });
 
-const ClassicBlueTemplate: React.FC<ResumePdfProps> = ({
+const Template1: React.FC<ResumePdfProps> = ({
   about,
   educationList,
   workList,
@@ -132,4 +132,4 @@ const ClassicBlueTemplate: React.FC<ResumePdfProps> = ({
   </Document>
 );
 
-export default ClassicBlueTemplate;
+export default Template1;

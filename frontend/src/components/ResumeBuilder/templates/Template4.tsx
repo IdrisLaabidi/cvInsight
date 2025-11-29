@@ -27,7 +27,7 @@ const Section: React.FC<{ title: string; children?: React.ReactNode }> = ({ titl
   </View>
 );
 
-const ClassicLinesTemplate: React.FC<ResumePdfProps> = ({
+const Template4: React.FC<ResumePdfProps> = ({
   about,
   educationList,
   workList,
@@ -132,4 +132,4 @@ const ClassicLinesTemplate: React.FC<ResumePdfProps> = ({
   </Document>
 );
 
-export default ClassicLinesTemplate;
+export default Template4;

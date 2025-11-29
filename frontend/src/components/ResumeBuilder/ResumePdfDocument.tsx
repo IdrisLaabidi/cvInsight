@@ -1,9 +1,9 @@
 import React from "react";
 import { About, Education, Work, Skill, Project, Language, Certificate, SocialActivity } from "./ResumeContext";
-import ClassicBlueTemplate from "./templates/ClassicBlueTemplate";
-import HealthGreenTemplate from "./templates/HealthGreenTemplate";
-import ClassicLinesTemplate from "./templates/ClassicLinesTemplate";
-import ClassicLines2Template from "./templates/ClassicLines2Template";
+import Template1 from "./templates/Template1.tsx";
+import Template3 from "./templates/Template3.tsx";
+import Template4 from "./templates/Template4.tsx";
+import Template2 from "./templates/Template2.tsx";
 
 export interface ResumePdfProps {
   about: About;
@@ -23,15 +23,15 @@ const ResumePdfDocument: React.FC<ResumePdfProps> = (props) => {
   const templateId = props.templateId ?? 'classic-blue';
 
   switch (templateId) {
-    case 'health-green':
-      return <HealthGreenTemplate {...props} />;
-    case 'classic-lines':
-      return <ClassicLinesTemplate {...props} />;
-    case 'classic-lines2':
-      return <ClassicLines2Template {...props} />;
-    case 'classic-blue':
+    case 'temp-3':
+      return <Template3 {...props} />;
+    case 'temp-4':
+      return <Template4 {...props} />;
+    case 'temp-2':
+      return <Template2 {...props} />;
+    case 'temp-1':
     default:
-      return <ClassicBlueTemplate {...props} />;
+      return <Template1 {...props} />;
   }
 };
 

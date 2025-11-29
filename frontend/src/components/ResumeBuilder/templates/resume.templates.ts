@@ -1,9 +1,8 @@
 import {ResumeTemplate} from "../../../types/resume.types.ts";
 
 export const RESUME_TEMPLATES: ResumeTemplate[] = [
-    // Keep only one of the previous similar templates as a base/default
     {
-        id: 'classic-blue',
+        id: 'temp-1',
         name: 'Classic Blue',
         description: 'Traditional professional layout with blue accents',
         thumbnail: '/templates/classic-blue.png',
@@ -12,9 +11,18 @@ export const RESUME_TEMPLATES: ResumeTemplate[] = [
         isPremium: false
     },
 
-    // New template inspired by the provided green healthcare resume
     {
-        id: 'health-green',
+        id: 'temp-2',
+        name: 'Classic Lines',
+        description: 'Centered name, black separators, uppercase headings; mirrors the provided image',
+        thumbnail: '/templates/classic-lines.png',
+        theme: 'mono',
+        layout: 'classic',
+        isPremium: false
+    },
+
+    {
+        id: 'temp-3',
         name: 'Health Green',
         description: 'Clean healthcare style with green accent headings, dotted rules, and skill tags',
         thumbnail: '/templates/health-green.png',
@@ -23,9 +31,8 @@ export const RESUME_TEMPLATES: ResumeTemplate[] = [
         isPremium: false
     },
 
-    // New template inspired by the provided classic black lines resume
     {
-        id: 'classic-lines',
+        id: 'temp-4',
         name: 'Classic Lines',
         description: 'Monochrome, serif headings with subtle top rule and section separators',
         thumbnail: '/templates/classic-lines.png',
@@ -34,14 +41,4 @@ export const RESUME_TEMPLATES: ResumeTemplate[] = [
         isPremium: false
     },
 
-    // New template closely matching the provided screenshot (centered name, bold rules)
-    {
-        id: 'classic-lines2',
-        name: 'Classic Lines',
-        description: 'Centered name, black separators, uppercase headings; mirrors the provided image',
-        thumbnail: '/templates/classic-lines.png',
-        theme: 'mono',
-        layout: 'classic',
-        isPremium: false
-    }
 ];
