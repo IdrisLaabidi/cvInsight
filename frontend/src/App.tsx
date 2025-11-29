@@ -15,7 +15,7 @@ import AuthGuard from "./components/auth/AuthGuard.tsx";
 import CvExtractionPage from "./pages/CVExtractionpage/CvExtractionPage.tsx";
 import CvAnalysis from "./pages/CVAnalysis/CvAnalysis.tsx";
 import CareerRecommendations from "./pages/RecommandationPage/CareerRecommendations.tsx";
-import ResumeBuilder from "./components/ResumeBuilder/ResumeBuilder.tsx";
+import ResumeBuilder from "./pages/CVBuilder/ResumeBuilder.tsx";
 import PublicRoute from "./components/auth/PublicRoute.tsx";
 
 export default function App() {

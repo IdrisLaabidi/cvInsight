@@ -49,7 +49,6 @@ export interface Project {
     github: string;
     description: string;
 }
-//TODO: Add languages , social activities and certifications
 
 export interface Language {
     id: string;

@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import { pdf } from "@react-pdf/renderer";
-import ResumePdfDocument from "./ResumePdfDocument";
-import { ResumeProvider, useResume } from "./ResumeContext";
-import About from "./About";
-import Education from "./Education";
-import Work from "./Work";
-import Skills from "./Skills";
-import Projects from "./Projects";
-import ResumePreview from "./ResumePreview";
-import { TemplateSelector } from "./templateSelector";
-import PageBreadcrumb from "../common/PageBreadCrumb.tsx";
-import SocialActivities from "./SocialActivities";
-import Certifications from "./Certifications";
-import Languages from "./Languages";
+import ResumePdfDocument from "../../components/ResumeBuilder/ResumePdfDocument.tsx";
+import { ResumeProvider, useResume } from "../../components/ResumeBuilder/ResumeContext.tsx";
+import About from "../../components/ResumeBuilder/About.tsx";
+import Education from "../../components/ResumeBuilder/Education.tsx";
+import Work from "../../components/ResumeBuilder/Work.tsx";
+import Skills from "../../components/ResumeBuilder/Skills.tsx";
+import Projects from "../../components/ResumeBuilder/Projects.tsx";
+import ResumePreview from "../../components/ResumeBuilder/ResumePreview.tsx";
+import { TemplateSelector } from "../../components/ResumeBuilder/templateSelector.tsx";
+import PageBreadcrumb from "../../components/common/PageBreadCrumb.tsx";
+import SocialActivities from "../../components/ResumeBuilder/SocialActivities.tsx";
+import Certifications from "../../components/ResumeBuilder/Certifications.tsx";
+import Languages from "../../components/ResumeBuilder/Languages.tsx";
 
 const tabs = [
     {
