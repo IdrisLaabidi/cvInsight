@@ -1,4 +1,4 @@
-import {ResumeTemplate} from "../types/resume.types.ts";
+import {ResumeTemplate} from "../../../types/resume.types.ts";
 
 export const RESUME_TEMPLATES: ResumeTemplate[] = [
     // Keep only one of the previous similar templates as a base/default
@@ -28,6 +28,17 @@ export const RESUME_TEMPLATES: ResumeTemplate[] = [
         id: 'classic-lines',
         name: 'Classic Lines',
         description: 'Monochrome, serif headings with subtle top rule and section separators',
+        thumbnail: '/templates/classic-lines.png',
+        theme: 'mono',
+        layout: 'classic',
+        isPremium: false
+    },
+
+    // New template closely matching the provided screenshot (centered name, bold rules)
+    {
+        id: 'classic-lines2',
+        name: 'Classic Lines',
+        description: 'Centered name, black separators, uppercase headings; mirrors the provided image',
         thumbnail: '/templates/classic-lines.png',
         theme: 'mono',
         layout: 'classic',
