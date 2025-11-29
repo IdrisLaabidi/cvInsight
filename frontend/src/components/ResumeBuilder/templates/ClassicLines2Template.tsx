@@ -5,8 +5,8 @@ import React from "react";
 Font.register({
     family: "Inter",
     fonts: [
-        { src: "/fonts/Inter-Regular.ttf", fontWeight: 400 },
-        { src: "/fonts/Inter-Bold.ttf", fontWeight: 700 },
+        { src: "https://rsms.me/inter/font-files/Inter-Regular.ttf", fontWeight: 400 },
+        { src: "https://rsms.me/inter/font-files/Inter-Bold.ttf", fontWeight: 700 },
     ],
 });
 
