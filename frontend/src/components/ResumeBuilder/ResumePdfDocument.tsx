@@ -71,6 +71,8 @@ export interface ResumePdfProps {
   languages: Language[];
   certificates: Certificate[];
   socialActivities: SocialActivity[];
+  // which visual template to use
+  templateId?: string; // 'classic-blue' | 'health-green' | 'classic-lines'
 }
 
 const ResumePdfDocument: React.FC<ResumePdfProps> = ({
@@ -84,16 +86,48 @@ const ResumePdfDocument: React.FC<ResumePdfProps> = ({
   languages,
   certificates,
   socialActivities,
+  templateId = 'classic-blue',
 }) => {
+  // derive palette/layout variations from templateId
+  const palette = (() => {
+    switch (templateId) {
+      case 'health-green':
+        return { accent: '#3b7f4a', accentSoft: '#d9eadf', rule: '#e5e7eb', mono: '#111827' };
+      case 'classic-lines':
+        return { accent: '#111827', accentSoft: '#f3f4f6', rule: '#111827', mono: '#111827' };
+      default:
+        return { accent: '#2563eb', accentSoft: '#dbeafe', rule: '#e5e7eb', mono: '#111827' };
+    }
+  })();
+
+  const sectionTitleStyle = {
+    ...styles.sectionTitle,
+    color: palette.accent,
+    textTransform: templateId === 'classic-lines' ? 'uppercase' as const : 'none' as const,
+    letterSpacing: templateId === 'classic-lines' ? 0.5 : 0,
+  };
+
+  const topRule = templateId === 'classic-lines';
+
+  const Section: React.FC<{ title: string; children?: React.ReactNode }> = ({ title, children }) => (
+    <View style={styles.section}>
+      <Text style={sectionTitleStyle}>{title}</Text>
+      {children}
+      {/* dotted rule variant for health-green */}
+      {templateId === 'health-green' ? (
+        <View style={{ borderBottomWidth: 1, borderBottomColor: palette.rule, borderStyle: 'dashed', marginTop: 6 }} />
+      ) : null}
+    </View>
+  );
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
         {/* Header */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.name}>{about.name || "Your Name"}</Text>
-            <Text style={styles.role}>{about.role || "Your Role"}</Text>
+        <View style={{ ...styles.header, borderBottomColor: palette.rule }}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ ...styles.name, color: palette.mono }}>{about.name || "Your Name"}</Text>
+            <Text style={{ ...styles.role, color: palette.accent }}>{about.role || "Your Role"}</Text>
             <Text style={styles.text}>{about.email || "email@example.com"} • {about.phone || "+123456789"}</Text>
             <Text style={styles.text}>{about.address || "City, Country"}</Text>
           </View>
@@ -102,17 +136,19 @@ const ResumePdfDocument: React.FC<ResumePdfProps> = ({
           ) : null}
         </View>
 
+        {topRule ? (
+          <View style={{ borderTopWidth: 2, borderTopColor: palette.rule, marginTop: 6 }} />
+        ) : null}
+
         {about.summary ? (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Summary</Text>
+          <Section title="Summary">
             <Text style={styles.text}>{about.summary}</Text>
-          </View>
+          </Section>
         ) : null}
 
         {/* Work Experience */}
         {workList && workList.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Work Experience</Text>
+          <Section title="Work Experience">
             {workList.map((w) => (
               <View key={w.id} style={{ marginBottom: 6 }}>
                 <Text style={styles.text}>
@@ -124,13 +160,12 @@ const ResumePdfDocument: React.FC<ResumePdfProps> = ({
                 {w.description ? <Text style={styles.text}>{w.description}</Text> : null}
               </View>
             ))}
-          </View>
+          </Section>
         )}
 
         {/* Education */}
         {educationList && educationList.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Education</Text>
+          <Section title="Education">
             {educationList.map((e) => (
               <View key={e.id} style={{ marginBottom: 6 }}>
                 <Text style={styles.text}>
@@ -141,13 +176,12 @@ const ResumePdfDocument: React.FC<ResumePdfProps> = ({
                 </Text>
               </View>
             ))}
-          </View>
+          </Section>
         )}
 
         {/* Projects */}
         {projects && projects.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Projects</Text>
+          <Section title="Projects">
             {projects.map((p) => (
               <View key={p.id} style={{ marginBottom: 6 }}>
                 <Text style={styles.text}>{p.name || "Project"}</Text>
@@ -159,58 +193,66 @@ const ResumePdfDocument: React.FC<ResumePdfProps> = ({
                 ) : null}
               </View>
             ))}
-          </View>
+          </Section>
         )}
 
         {/* Skills */}
         {(skills?.length || softSkills?.length || interests?.length) ? (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Skills</Text>
-            {skills?.length ? (
-              <Text style={styles.text}>Technical: {skills.map(s => s.name).join(", ")}</Text>
-            ) : null}
-            {softSkills?.length ? (
-              <Text style={styles.text}>Soft: {softSkills.map(s => s.name).join(", ")}</Text>
-            ) : null}
-            {interests?.length ? (
-              <Text style={styles.text}>Interests: {interests.map(s => s.name).join(", ")}</Text>
-            ) : null}
-          </View>
+          <Section title="Skills">
+            {templateId === 'health-green' ? (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
+                {[...(skills || []), ...(softSkills || []), ...(interests || [])].map((s, idx) => (
+                  <View key={idx} style={{ backgroundColor: palette.accentSoft, paddingHorizontal: 6, paddingVertical: 3, borderRadius: 10, marginRight: 4, marginBottom: 4 }}>
+                    <Text style={{ fontSize: 10, color: palette.mono }}>{s.name}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <>
+                {skills?.length ? (
+                  <Text style={styles.text}>Technical: {skills.map(s => s.name).join(", ")}</Text>
+                ) : null}
+                {softSkills?.length ? (
+                  <Text style={styles.text}>Soft: {softSkills.map(s => s.name).join(", ")}</Text>
+                ) : null}
+                {interests?.length ? (
+                  <Text style={styles.text}>Interests: {interests.map(s => s.name).join(", ")}</Text>
+                ) : null}
+              </>
+            )}
+          </Section>
         ) : null}
 
         {/* Languages */}
         {languages && languages.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Languages</Text>
+          <Section title="Languages">
             <Text style={styles.text}>
               {languages.map(l => `${l.name} (${l.level})`).join(", ")}
             </Text>
-          </View>
+          </Section>
         )}
 
         {/* Certifications */}
         {certificates && certificates.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Certifications</Text>
+          <Section title="Certifications">
             {certificates.map(c => (
               <Text key={c.id} style={styles.text}>
                 {c.title} — {c.issuer} {c.year ? `(${c.year})` : ""}
               </Text>
             ))}
-          </View>
+          </Section>
         )}
 
         {/* Social Activities */}
         {socialActivities && socialActivities.length > 0 && (
-          <View style={{ ...styles.section, marginBottom: 8 }}>
-            <Text style={styles.sectionTitle}>Social Activities</Text>
+          <Section title="Social Activities">
             {socialActivities.map(sa => (
               <View key={sa.id} style={styles.bullet}>
                 <Text style={styles.text}>{sa.role} — {sa.organization}</Text>
                 {sa.description ? <Text style={styles.text}>{sa.description}</Text> : null}
               </View>
             ))}
-          </View>
+          </Section>
         )}
 
         {/* Footer page number */}

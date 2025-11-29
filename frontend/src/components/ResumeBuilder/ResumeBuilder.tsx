@@ -14,10 +14,6 @@ import SocialActivities from "./SocialActivities";
 import Certifications from "./Certifications";
 import Languages from "./Languages";
 
-// Installer ces packages:
-// npm install jspdf html2canvas
-// npm install --save-dev @types/jspdf
-
 const tabs = [
     {
         id: "template",
@@ -109,7 +105,7 @@ const tabs = [
 const ResumeBuilderContent: React.FC = () => {
     const [activeTab, setActiveTab] = useState("template");
     const [isDownloading, setIsDownloading] = useState(false);
-    const { selectedTemplate, setSelectedTemplate, about, printElem, educationList, workList, skills, softSkills, interests, projects, languages, certificates, socialActivities } = useResume();
+    const { selectedTemplate, setSelectedTemplate, about , educationList, workList, skills, softSkills, interests, projects, languages, certificates, socialActivities } = useResume();
 
     const renderTab = () => {
         switch (activeTab) {
@@ -151,6 +147,7 @@ const ResumeBuilderContent: React.FC = () => {
                     languages={languages}
                     certificates={certificates}
                     socialActivities={socialActivities}
+                    templateId={selectedTemplate}
                 />
             ).toBlob();
 

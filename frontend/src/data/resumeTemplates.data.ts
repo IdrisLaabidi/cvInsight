@@ -1,6 +1,7 @@
 import {ResumeTemplate} from "../types/resume.types.ts";
 
 export const RESUME_TEMPLATES: ResumeTemplate[] = [
+    // Keep only one of the previous similar templates as a base/default
     {
         id: 'classic-blue',
         name: 'Classic Blue',
@@ -10,49 +11,26 @@ export const RESUME_TEMPLATES: ResumeTemplate[] = [
         layout: 'classic',
         isPremium: false
     },
+
+    // New template inspired by the provided green healthcare resume
     {
-        id: 'modern-green',
-        name: 'Modern Green',
-        description: 'Clean and modern design with green highlights',
-        thumbnail: '/templates/modern-green.png',
+        id: 'health-green',
+        name: 'Health Green',
+        description: 'Clean healthcare style with green accent headings, dotted rules, and skill tags',
+        thumbnail: '/templates/health-green.png',
         theme: 'green',
         layout: 'modern',
         isPremium: false
     },
+
+    // New template inspired by the provided classic black lines resume
     {
-        id: 'minimal-purple',
-        name: 'Minimal Purple',
-        description: 'Minimalist design with purple accents',
-        thumbnail: '/templates/minimal-purple.png',
-        theme: 'purple',
-        layout: 'minimal',
-        isPremium: false
-    },
-    {
-        id: 'creative-orange',
-        name: 'Creative Orange',
-        description: 'Bold and creative layout with orange theme',
-        thumbnail: '/templates/creative-orange.png',
-        theme: 'orange',
-        layout: 'creative',
-        isPremium: false
-    },
-    {
-        id: 'professional-teal',
-        name: 'Professional Teal',
-        description: 'Corporate professional with teal accents',
-        thumbnail: '/templates/professional-teal.png',
-        theme: 'teal',
-        layout: 'professional',
-        isPremium: false
-    },
-    {
-        id: 'ats-mono',
-        name: 'ATS Monochrome',
-        description: 'ATS-friendly template with black & white text only',
-        thumbnail: '/templates/ats-mono.png',
+        id: 'classic-lines',
+        name: 'Classic Lines',
+        description: 'Monochrome, serif headings with subtle top rule and section separators',
+        thumbnail: '/templates/classic-lines.png',
         theme: 'mono',
-        layout: 'minimal',
+        layout: 'classic',
         isPremium: false
     }
 ];

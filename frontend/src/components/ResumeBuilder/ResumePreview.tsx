@@ -15,6 +15,7 @@ const ResumePreview = forwardRef<HTMLDivElement>((_, __) => {
         languages,
         certificates,
         socialActivities,
+        selectedTemplate,
     } = useResume();
 
     // Defer fast-typing updates to reduce PDFViewer re-mount flicker
@@ -42,6 +43,7 @@ const ResumePreview = forwardRef<HTMLDivElement>((_, __) => {
             languages={dLanguages}
             certificates={dCertificates}
             socialActivities={dSocialActivities}
+            templateId={selectedTemplate}
         />
     ), [
         dAbout,
@@ -54,6 +56,7 @@ const ResumePreview = forwardRef<HTMLDivElement>((_, __) => {
         dLanguages,
         dCertificates,
         dSocialActivities,
+        selectedTemplate,
     ]);
 
     // Keep a stable URL displayed to avoid iframe re-mount flicker while a new PDF is generating
