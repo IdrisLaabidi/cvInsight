@@ -45,5 +45,14 @@ export const RESUME_TEMPLATES: ResumeTemplate[] = [
         theme: 'teal',
         layout: 'professional',
         isPremium: false
+    },
+    {
+        id: 'ats-mono',
+        name: 'ATS Monochrome',
+        description: 'ATS-friendly template with black & white text only',
+        thumbnail: '/templates/ats-mono.png',
+        theme: 'mono',
+        layout: 'minimal',
+        isPremium: false
     }
 ];

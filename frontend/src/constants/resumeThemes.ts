@@ -40,5 +40,13 @@ export const THEME_COLORS = {
         text: 'text-teal-600',
         border: 'border-teal-600',
         badge: 'bg-teal-600 text-white'
+    },
+    // Monochrome theme for ATS-friendly black & white resumes
+    mono: {
+        primary: 'bg-black',
+        secondary: 'bg-white',
+        text: 'text-black',
+        border: 'border-black',
+        badge: 'bg-black text-white'
     }
 };
