@@ -1,113 +1,76 @@
-import { forwardRef, useDeferredValue, useMemo, useEffect, useState } from "react";
 import { BlobProvider } from "@react-pdf/renderer";
 import { useResume } from "./ResumeContext";
 import ResumePdfDocument from "./ResumePdfDocument";
+import { useEffect, useState, useMemo, forwardRef } from 'react';
+
+const DEBOUNCE_MS = 1000;
 
 const ResumePreview = forwardRef<HTMLDivElement>((_, __) => {
-    const {
-        about,
-        educationList,
-        skills,
-        softSkills,
-        interests,
-        workList,
-        projects,
-        languages,
-        certificates,
-        socialActivities,
-        selectedTemplate,
-    } = useResume();
+    const resume = useResume();
 
-    // Defer fast-typing updates to reduce PDFViewer re-mount flicker
-    const dAbout = useDeferredValue(about);
-    const dEducationList = useDeferredValue(educationList);
-    const dSkills = useDeferredValue(skills);
-    const dSoftSkills = useDeferredValue(softSkills);
-    const dInterests = useDeferredValue(interests);
-    const dWorkList = useDeferredValue(workList);
-    const dProjects = useDeferredValue(projects);
-    const dLanguages = useDeferredValue(languages);
-    const dCertificates = useDeferredValue(certificates);
-    const dSocialActivities = useDeferredValue(socialActivities);
-
-    // Memoize the document element so the iframe doesn't thrash on each keystroke
-    const memoizedDoc = useMemo(() => (
-        <ResumePdfDocument
-            about={dAbout}
-            educationList={dEducationList}
-            workList={dWorkList}
-            skills={dSkills}
-            softSkills={dSoftSkills}
-            interests={dInterests}
-            projects={dProjects}
-            languages={dLanguages}
-            certificates={dCertificates}
-            socialActivities={dSocialActivities}
-            templateId={selectedTemplate}
-        />
-    ), [
-        dAbout,
-        dEducationList,
-        dWorkList,
-        dSkills,
-        dSoftSkills,
-        dInterests,
-        dProjects,
-        dLanguages,
-        dCertificates,
-        dSocialActivities,
-        selectedTemplate,
-    ]);
-
-    // Keep a stable URL displayed to avoid iframe re-mount flicker while a new PDF is generating
-    const [displayedUrl, setDisplayedUrl] = useState<string | null>(null);
-    const [toRevoke, setToRevoke] = useState<string | null>(null);
+    const [stableData, setStableData] = useState(resume);
 
     useEffect(() => {
-        return () => {
-            if (displayedUrl) URL.revokeObjectURL(displayedUrl);
-            if (toRevoke) URL.revokeObjectURL(toRevoke);
-        };
-    }, [displayedUrl, toRevoke]);
+        const handle = setTimeout(() => setStableData(resume), DEBOUNCE_MS);
+        return () => clearTimeout(handle);
+    }, [resume]);
 
-    const StabilizedIframe: React.FC<{ url: string | null; loading: boolean }> = ({ url, loading }) => {
-        useEffect(() => {
-            if (!loading && url && url !== displayedUrl) {
-                setToRevoke((prev) => {
-                    if (prev && prev !== url) URL.revokeObjectURL(prev);
-                    return displayedUrl; // schedule revocation of the currently displayed URL
-                });
-                setDisplayedUrl(url);
-            }
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [loading, url]);
+    const memoizedDoc = useMemo(() => (
+        <ResumePdfDocument
+            about={stableData.about}
+            educationList={stableData.educationList}
+            workList={stableData.workList}
+            skills={stableData.skills}
+            softSkills={stableData.softSkills}
+            interests={stableData.interests}
+            projects={stableData.projects}
+            languages={stableData.languages}
+            certificates={stableData.certificates}
+            socialActivities={stableData.socialActivities}
+            templateId={stableData.selectedTemplate}
+        />
+    ), [stableData]);
 
-        const effectiveUrl = displayedUrl ?? url;
-        const src = effectiveUrl ? `${effectiveUrl}#toolbar=0&navpanes=0&scrollbar=0` : undefined;
-
-        return (
-            <div className="w-full" style={{ height: 900 }}>
-                {src ? (
-                    <iframe
-                        title="Resume Preview"
-                        src={src}
-                        style={{ width: '100%', height: '100%', border: 'none' }}
-                    />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm">
-                        Generating preview...
-                    </div>
-                )}
-            </div>
-        );
-    };
+    const [displayedUrl, setDisplayedUrl] = useState<string | null>(null);
 
     return (
-        <div className="w-full h-full rounded-xl overflow-hidden">
+        <div className="relative w-full h-full rounded-xl overflow-hidden">
             <BlobProvider document={memoizedDoc}>
-                {({ url, loading }) => (
-                    <StabilizedIframe url={url} loading={loading} />
-                )}
+                {({ url, loading }) => {
+                    if (!loading && url && url !== displayedUrl) {
+                        setDisplayedUrl(url);
+                    }
+
+                    return (
+                        <div className="relative w-full bg-white" style={{ height: 900 }}>
+                            {displayedUrl && (
+                                <iframe
+                                    title="Resume Preview"
+                                    src={`${displayedUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                                    className={`w-full h-full transition-all duration-300
+                                        ${loading ? "blur-sm" : "blur-0"}
+                                    `}
+                                    style={{ border: "none", background: "#fff" }}  // 🔥 force white background
+                                />
+                            )}
+
+                            {loading && (
+                                <div className="
+                                    absolute inset-0 flex items-center justify-center
+                                    bg-white/40 backdrop-blur-sm animate-fadeIn
+                                ">
+                                    <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-gray-500"></div>
+                                </div>
+                            )}
+
+                            {!displayedUrl && (
+                                <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm">
+                                    Generating preview...
+                                </div>
+                            )}
+                        </div>
+                    );
+                }}
             </BlobProvider>
         </div>
     );
